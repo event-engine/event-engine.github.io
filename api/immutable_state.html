@@ -1,0 +1,1389 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<meta name="HandheldFriendly" content="True"/>
+<title>Immutable State</title>
+<link rel="shortcut icon" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/prooph-logo@0.5x.png">
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/apple-touch-icon-144-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/apple-touch-icon-114-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/apple-touch-icon-72-precomposed.png">
+<link rel="apple-touch-icon-precomposed" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/apple-touch-icon-57-precomposed.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@prooph_software">
+<meta name="twitter:title" content="Event Machine">
+<meta name="twitter:description" content="Rapid CQRS / ES framework for PHP with a path to refactor towards a richer domain model as needed.">
+<meta name="twitter:image" content="https://proophsoftware.github.io/event-machine/img/Event_Machine_Intro.png">
+    <link rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/lumen/bootstrap.min.css">
+<link rel="stylesheet"
+      href="https://tobiju.github.io/share/prismjs/prism-ghcolors.css"/>
+<link rel="stylesheet"
+      href="https://tobiju.github.io/share/prismjs/prism-linenumbers.css"/>
+<style>
+    body, html {
+        height: 100%;
+        padding-top: 36px;
+        position: relative;
+    }
+
+    img {
+        max-width: 100%;
+    }
+
+    code span {
+        white-space: nowrap;
+    }
+    code span.comment {
+        white-space: pre;
+    }
+
+    .highlight {
+        background: #FFFF88;
+    }
+
+    .page-wrapper {
+        min-height: 100%;
+        padding-bottom: 170px;
+        position: relative;
+    }
+
+    .box-header {
+        position: relative;
+    }
+
+    /* Header Section */
+    header {
+        background: white;
+        color: black;
+        font-size: 16px;
+        font-weight: 300;
+    }
+
+    h1:first-child {
+        margin-top: 0;
+    }
+
+    /* anchor link will be displayed after the static top nav */
+    h1:before,
+    h2:before,
+    h3:before,
+    h4:before,
+    h5:before,
+    h6:before {
+        display: block;
+        content: " ";
+        margin-top: -64px;
+        height: 64px;
+        visibility: hidden;
+    }
+
+    .navbar-brand {
+        padding: 0;
+    }
+
+    .navbar-brand img {
+        max-height: 100%;
+    }
+
+    /* Content Section */
+    #content {
+        margin-bottom: 17px;
+        font-size: 17px;
+        min-height: 200px;
+    }
+
+    .breadcrumb {
+        position: relative;
+        z-index: 999;
+    }
+
+    .links {
+        background: #f8f8f8;
+        border-top: 1px solid #e5e5e5;
+        border-bottom: 1px solid #e5e5e5;
+        padding: 16px 0;
+    }
+
+    .links .prev {
+        text-align: left;
+    }
+
+    .links .parent {
+        text-align: center;
+    }
+
+    .links .next {
+        text-align: right;
+    }
+
+    /* Search */
+    .form-search {
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 999;
+    }
+
+    @media (max-width: 767px) {
+        .form-search {
+            position: relative;
+            margin-top: 0;
+        }
+    }
+
+    .form-search .form-control {
+        border: 0;
+        width: 80px;
+    }
+
+    @media (max-width: 767px) {
+        .form-search .form-control {
+            width: 100% !important;
+        }
+    }
+
+    .form-search .list-search-results {
+        position: relative;
+    }
+
+    .form-search .list-search-results ul {
+        background: #eee;
+        border: 1px solid inherit;
+        list-style: none;
+        max-height: 300px;
+        overflow: auto;
+        padding: 0;
+        position: absolute;
+        width: 100%;
+        z-index: 999;
+    }
+
+    .form-search .list-search-results ul li:nth-child(even) {
+        background: rgba(255, 255, 255, 0.3)
+    }
+
+    .form-search .list-search-results ul li.selected {
+        background: #ccc;
+    }
+
+    .form-search .list-search-results ul li a {
+        display: block;
+        padding: 4px 8px;
+    }
+
+    /* TOC */
+    .list-toc {
+        padding: 0;
+    }
+
+    .list-toc .list-group-item {
+        background: 0 none;
+        position: relative;
+        font-weight: bold;
+        padding: 0;
+        margin: 0;
+    }
+
+    .list-toc li .text-number {
+        padding-left: 20px;
+    }
+    .list-toc li li .text-number {
+        padding-left: 40px;
+    }
+    .list-toc li li li .text-number {
+        padding-left: 60px;
+    }
+    .list-toc li li li li .text-number {
+        padding-left: 80px;
+    }
+    .list-toc li li li li li .text-number {
+        padding-left: 100px;
+    }
+    .list-toc .text-number {
+        padding-left: 100px;
+    }
+
+    .list-toc .list-group-item .row {
+        padding: 7px 0 7px;
+    }
+
+    .list-toc .list-group-item .bbt-toc-toggle {
+        display: block;
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        font-weight: normal;
+    }
+
+    .list-toc .list-group-item .bbt-toc-toggle:before {
+        content: "";
+        display: block;
+    }
+
+    .list-toc .list-group-item .bbt-toc-toggle.collapsed:before {
+        content: "";
+        display: block;
+    }
+
+    .list-toc > li:nth-child(2n+1) {
+        background: rgba(0, 0, 0, 0.03);
+    }
+
+    .bbt-theme-cyborg .list-toc > li:nth-child(2n+1),
+    .bbt-theme-darkly .list-toc > li:nth-child(2n+1),
+    .bbt-theme-slate .list-toc > li:nth-child(2n+1),
+    .bbt-theme-superhero .list-toc > li:nth-child(2n+1) {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .list-toc .list-group-item {
+        border-bottom: 0 none;
+        border-left: 0 none;
+        border-right: 0 none;
+        font-size: inherit;
+    }
+
+    .list-toc .list-group-item:first-child {
+        border-top-right-radius: 0;
+        border-top-left-radius: 0;
+    }
+
+    .list-toc .list-group-item:last-child {
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    /* Left navigation */
+    .nav-left ul li a {
+        padding-top: 3px;
+        padding-bottom: 3px;
+        border-left: 1px solid transparent;
+    }
+
+    .nav-left ul li.active a,
+    .nav-left ul li a:hover {
+        background: none !important;
+        color: inherit;
+        border-color: inherit;
+    }
+
+    .navbar-top {
+        position: relative;
+    }
+
+    .affix {
+        top: 60px;
+    }
+
+    .badge {
+        border-radius: 4px;
+        padding: 5px;
+    }
+
+    /* Footer Section */
+    footer {
+        color: black;
+        background: white;
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+    }
+
+    footer #copyright {
+        padding: 30px;
+        text-align: center;
+        color: #444;
+    }
+
+    footer #copyright p {
+        margin: 0;
+    }
+
+    footer #copyright span a {
+        color: white;
+    }
+
+    /* Top Navigation */
+    @media (max-width: 767px) {
+        ul.navbar-nav {
+            margin: 0 -15px
+        }
+
+        ul.navbar-nav li {
+            border-radius: 0;
+        }
+
+        ul.navbar-nav li ul {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            display: block;
+            float: none;
+            left: auto;
+            padding: 0;
+            position: static;
+        }
+
+        ul.navbar-nav li ul li a {
+            padding: 8px 30px;
+        }
+
+        ul.navbar-nav li ul li ul li a {
+            padding: 6px 40px;
+        }
+    }
+
+    @media (min-width: 768px) {
+
+        ul.navbar-nav li {
+            display: block;
+            position: relative;
+            float: left;
+        }
+
+        ul.navbar-nav li ul {
+            display: none;
+        }
+
+        ul.navbar-nav li a {
+            display: block;
+        }
+
+        ul.navbar-nav li:hover > ul {
+            display: block;
+            position: absolute;
+        }
+
+        ul.navbar-nav li:hover li {
+            float: none;
+        }
+
+        ul.navbar-nav ul ul {
+            left: 100%;
+            top: 0;
+        }
+    }
+</style>
+    <style>
+    body {
+        font-size: 16px;
+    }
+    /* Header Section */
+    header {
+        font-size: 17px;
+        font-weight: 400;
+    }
+
+    .dropdown-menu {
+        font-size: 17px;
+    }
+
+    .alert-light {
+        color: #818182;
+        background-color: #fefefe;
+    }
+
+    .alert-dark {
+        color: #1b1e21;
+        background-color: #d6d8d9;
+        border-color: #c6c8ca;
+    }
+
+    .prooph-logo {
+        float: left;
+        margin-left: 8px;
+        margin-right: 8px;
+        transition-timing-function: ease-in-out;
+        transition: all 5s;
+        height: 50px;
+        padding: 5px;
+    }
+
+    .jumbotron {
+       background-color: #04A1B0;
+    }
+
+    .jumbotron .display-1 {
+        color: white;
+    }
+
+    .jumbotron .display-2 {
+        color: white;
+    }
+
+    .jumbotron pre {
+        display: block;
+        color: #f8f8f2;
+        font-size: 13px;
+        margin-top: 60px;
+        border-radius: 0;
+        border: none;
+        background: #272822;
+        padding: 1em;
+        padding-bottom: 0px;
+        overflow: auto;
+        text-shadow: 0 1px rgba(0,0,0,0.3);
+        font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+        text-align: left;
+        white-space: pre;
+        word-spacing: normal;
+        word-break: normal;
+        word-wrap: normal;
+        line-height: 1.5;
+        -moz-tab-size: 4;
+        -o-tab-size: 4;
+        tab-size: 4;
+        -webkit-hyphens: none;
+        -moz-hyphens: none;
+        -ms-hyphens: none;
+        hyphens: none;
+    }
+
+    .jumbotron pre.line-numbers {
+        position: relative;
+        padding-left: 3.8em;
+        counter-reset: linenumber;
+    }
+
+    .jumbotron pre code {
+        color: white;
+        margin-left: -80px;
+    }
+
+
+    h2.front {
+        text-align: center;
+        font-size: 56px;
+        margin-top: 100px;
+        padding: 20px;
+    }
+
+    .intro {
+        margin-top: 30px;
+        font-size: 24px;
+        font-weight: 200;
+    }
+
+    .intro.sub-intro {
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+
+    .flavour {
+        height: 200px;
+    }
+
+    .flavour h3 {
+        color: white;
+        font-size: 30px;
+    }
+
+    .flavour h3 small {
+        color: #f2f2f2;
+        font-size: 20px;
+    }
+
+    .flavour.prototyping {
+        background-color: #CC3340;
+    }
+
+    .flavour.functional {
+        background-color: #EB6842;
+    }
+
+    .flavour.oop {
+        background-color: #715671;
+    }
+
+    .flavour.mixed {
+        background-color: #26896C;
+    }
+
+    .btn-get-started {
+        background-color: #04A1B0;
+        color: white;
+        padding: 20px 26px;
+        font-size: 35px;
+        border-radius: 8px;
+        width: 100%;
+        -webkit-transition-duration: 0.4s; /* Safari */
+        transition-duration: 0.4s;
+    }
+
+    .btn-get-started:hover {
+        background-color: #04c8d7;
+        color: white;
+        border-bottom-width: 4px;
+        margin-top: 0px;
+    }
+
+    .img-center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 50%;
+    }
+
+
+    #forkongithub a {
+        background: #000;
+        color: #fff;
+        text-decoration: none;
+        font-family: arial, sans-serif;
+        text-align: center;
+        font-weight: bold;
+        padding: 5px 40px;
+        font-size: 1rem;
+        line-height: 2rem;
+        position: relative;
+        transition: 0.5s;
+    }
+
+    #forkongithub a:hover {
+        background: #c11;
+        color: #fff;
+    }
+
+    #forkongithub a::before, #forkongithub a::after {
+        content: "";
+        width: 100%;
+        display: block;
+        position: absolute;
+        top: 1px;
+        left: 0;
+        height: 1px;
+        background: #fff;
+    }
+
+    #forkongithub a::after {
+        bottom: 1px;
+        top: auto;
+    }
+
+    @media screen and (min-width: 800px) {
+        #forkongithub {
+            position: fixed;
+            display: block;
+            top: 0;
+            right: 0;
+            width: 200px;
+            overflow: hidden;
+            height: 200px;
+            z-index: 1000;
+        }
+
+        #forkongithub a {
+            width: 200px;
+            position: absolute;
+            top: 80px;
+            right: -60px;
+            transform: rotate(45deg);
+            -webkit-transform: rotate(45deg);
+            -ms-transform: rotate(45deg);
+            -moz-transform: rotate(45deg);
+            -o-transform: rotate(45deg);
+            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.8);
+        }
+    }
+
+    @media screen and (max-width: 799px) {
+        .jumbotron {
+            margin-top: 60px;
+        }
+    }
+
+    @media screen and (max-width: 991px) {
+        .jumbotron pre {
+            display: none;
+        }
+
+        .flavour {
+            margin-top: 60px;
+        }
+    }
+</style>
+</head>
+<body data-spy="scroll" data-target="#sideNav" data-offset="50" class="bbt-theme-lumen">
+<div class="page-wrapper">
+    <header>
+    
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="box-header container">
+        <form class="form-search navbar-form navbar-right" role="search">
+            <div class="form-group">
+                <input type="text"
+                       placeholder="Search"
+                       class="js-search-input form-control"
+                       data-roothref="https://event-engine.io/">
+
+                <div class="js-search-results"></div>
+            </div>
+        </form>
+
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#js-navbar-collapse" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="https://event-engine.io/">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" class="prooph-logo">
+                    <defs>
+                        <style>
+                            .cls-1{fill:#04a1b0;}.cls-2{fill:#26896c;}.cls-3{fill:#eeca50;}.cls-4{fill:#eb6842;}.cls-5{fill:#cc3340;}.cls-6{fill:#715671;}
+                        </style>
+                    </defs>
+                    <title>prooph-logo</title>
+                    <g id="artwork">
+                        <g id="Layer_5" data-name="Layer 5">
+                            <path class="cls-1"
+                                  d="M57.22,17,67.84,35.43a1.77,1.77,0,0,0,1.53.89h61.25a1.77,1.77,0,0,0,1.53-.89L142.78,17a1.77,1.77,0,0,0-1.53-2.66H58.76A1.77,1.77,0,0,0,57.22,17Z"/>
+                            <path class="cls-2"
+                                  d="M29.54,94.68l30.63-53a1.77,1.77,0,0,0,0-1.77L49.55,21.48a1.77,1.77,0,0,0-3.07,0L5.24,92.91a1.77,1.77,0,0,0,1.53,2.66H28A1.77,1.77,0,0,0,29.54,94.68Z"/>
+                            <path class="cls-3"
+                                  d="M60.16,158.36l-30.63-53a1.77,1.77,0,0,0-1.53-.89H6.78a1.77,1.77,0,0,0-1.53,2.66l41.24,71.43a1.77,1.77,0,0,0,3.07,0l10.61-18.38A1.77,1.77,0,0,0,60.16,158.36Z"/>
+                            <path class="cls-4"
+                                  d="M130.63,163.68H69.37a1.77,1.77,0,0,0-1.53.89L57.22,183a1.77,1.77,0,0,0,1.53,2.66h82.48a1.77,1.77,0,0,0,1.53-2.66l-10.61-18.38A1.77,1.77,0,0,0,130.63,163.68Z"/>
+                            <path class="cls-5"
+                                  d="M170.46,105.32l-30.63,53a1.77,1.77,0,0,0,0,1.77l10.61,18.38a1.77,1.77,0,0,0,3.07,0l41.24-71.43a1.77,1.77,0,0,0-1.53-2.66H172A1.77,1.77,0,0,0,170.46,105.32Z"/>
+                            <path class="cls-6"
+                                  d="M139.84,41.64l30.63,53a1.77,1.77,0,0,0,1.53.89h21.23a1.77,1.77,0,0,0,1.53-2.66L153.52,21.48a1.77,1.77,0,0,0-3.07,0L139.84,39.86A1.77,1.77,0,0,0,139.84,41.64Z"/>
+                        </g>
+                    </g>
+                </svg>
+            </a>
+
+        </div>
+
+        <div class="collapse navbar-collapse" id="js-navbar-collapse">
+            
+    
+    <ul class="nav navbar-nav">
+                        <li>
+    <a href="https://event-engine.io/intro/">Introduction</a>
+    
+    <ul class="dropdown-menu">
+                        <li>
+    <a href="https://event-engine.io/intro/about.html">About Event Engine</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/intro/pros_and_cons.html">Pros and cons</a>
+
+    </li>
+            </ul>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/">Tutorial</a>
+    
+    <ul class="dropdown-menu">
+                        <li>
+    <a href="https://event-engine.io/tutorial/intro.html">Introduction</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/partI.html">Part I - Add A Building</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/partII.html">Part II - The Building Aggregate</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/partIII.html">Part III - Aggregate State</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/partIV.html">Part IV - Projections and Queries</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/partV.html">Part V - DRY</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/partVI.html">Part VI - Check in User</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/partVII.html">Part VII - The Unhappy Path</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/bonusI.html">Bonus I - Custom Projection</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/bonusII.html">Bonus II - Unit and Integration Tests</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/bonusIII.html">Bonus III - Functional Flavour</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/bonusIV.html">Bonus IV - OOP Flavour</a>
+
+    </li>
+            </ul>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/api/">API</a>
+    
+    <ul class="dropdown-menu">
+                        <li>
+    <a href="https://event-engine.io/api/set_up/">Set Up</a>
+    
+    <ul class="dropdown-menu">
+                        <li>
+    <a href="https://event-engine.io/api/set_up/installation.html">Installation</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/api/set_up/di.html">Dependency Injection</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/api/set_up/production_optimization.html">Optimize For Production</a>
+
+    </li>
+            </ul>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/api/descriptions.html">Event Engine Descriptions</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/api/functional_flavour.html">Functional Flavour</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/api/immutable_state.html">Immutable State</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/api/document_store/">Document Store</a>
+    
+    <ul class="dropdown-menu">
+                        <li>
+    <a href="https://event-engine.io/api/document_store/set_up.html">Document Store</a>
+
+    </li>
+            </ul>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/api/projections/">Projections</a>
+    
+    <ul class="dropdown-menu">
+                        <li>
+    <a href="https://event-engine.io/api/projections/set_up.html">Custom Projections</a>
+
+    </li>
+            </ul>
+
+    </li>
+            </ul>
+
+    </li>
+            </ul>
+
+        </div>
+    </div>
+</nav>
+</header>
+<div class="container">
+    <ol class="breadcrumb">
+                        <li><a href="https://event-engine.io/">Event Engine Docs</a></li>
+                                <li><a href="https://event-engine.io/api/">API</a></li>
+                                <li class="active">Immutable State</li>
+            </ol>
+    <div class="row">
+
+                <div class="col-md-3">
+            <nav class="nav-left hidden-xs hidden-sm" id="sideNav">
+    <ul class="nav nav-stacked" data-spy="affix" data-offset-top="59" role="tablist">
+                                <li>
+                <a href="#3-4" title="Immutable&#x20;State">Immutable State</a>
+            </li>
+                                <li>
+                <a href="#3-4-1" title="PHPStorm&#x20;Templates">PHPStorm Templates</a>
+            </li>
+                                <li>
+                <a href="#3-4-2" title="Scalar&#x20;Value&#x20;Objects">Scalar Value Objects</a>
+            </li>
+                                <li>
+                <a href="#3-4-3" title="Specialized&#x20;Scalar&#x20;Types">Specialized Scalar Types</a>
+            </li>
+                                                        <li>
+                <a href="#3-4-4" title="List&#x20;&#x2F;&#x20;Collection">List / Collection</a>
+            </li>
+                                <li>
+                <a href="#3-4-5" title="Complex&#x20;Types">Complex Types</a>
+            </li>
+                                                            </ul>
+</nav>
+        </div>
+                <div class="col-md-9">
+<div id="section-main"><h1 id="3-4">Immutable State</h1>
+<p>Using immutable objects whenever possible results in robust implementations. Function calls and state changes become predictable.
+Using value objects instead of raw data structures like arrays or plain strings adds type safety, acts as documentation and makes code much more
+readable. All very important properties for long-lived applications that are constantly reshaped.</p>
+<p>The <code>EventEngine\Data</code> package provides useful helpers to speed up development of immutable objects. In fact, when using the Prototyping or Functional
+Flavour <strong>all application state should be immutable</strong>.</p>
+<p class="alert alert-warning">For the OOP Flavour the only exception are Aggregate Roots. But even then it's recommended
+to use a single internal state property within the AR that references immutable state and is the only mutable part of the object.</p>
+<h2 id="3-4-1">PHPStorm Templates</h2>
+<p>Writing immutable value objects in PHP is painful because you need a lot of boilerplate code and always have the risk to
+introduce bugs due to typos.</p>
+<p>Libraries like <a href="https://github.com/prolic/fpp">FPP</a> aim to simplify the task of writing immutable objects and combine them to complex structures.</p>
+<p class="alert alert-dark">FPP works quite well and you can use it together with Event Engine.</p>
+<p>However, if you don't want to learn another meta language but still want to avoid writing all the boilerplate that comes along with immutable objects,
+<code>EventEngine\Data</code> combined with PHPStorm Live Templates might be for you.</p>
+<p class="alert alert-info">Keep in mind that both FPP and EventEngine\Data are only suggestions. You don't have to use them. It's also fine if you prefer working with a serializer library.</p>
+<p>The <code>EventEngine\Data</code> package contains a set of live templates specifically designed to work together with the <code>EventEngine\Data\ImmutableRecord</code>.</p>
+<p>You can import the templates by following official <a href="https://www.jetbrains.com/help/phpstorm/sharing-live-templates.html">PHPStorm instructions</a>.
+Please find the <code>settings.zip</code> <a href="https://github.com/event-engine/php-engine/blob/master/.env/PHPStorm/settings.zip">here</a>.</p>
+<h2 id="3-4-2">Scalar Value Objects</h2>
+<p>Each scalar PHP type (string, int, float, bool) has a corresponding template that you can access by typing <code>vo_&lt;scalar type&gt;</code> in a PHP file.</p>
+<ol>
+<li>Create an empty value object class.</li>
+<li>Invoke the template in the class body.</li>
+<li>Define the name of the inner property.</li>
+</ol>
+<p>See examples:</p>
+<ul class="nav nav-tabs">
+    <li class="active"><a data-toggle="tab" href="#vo_string">vo_string</a></li>
+    <li><a data-toggle="tab" href="#vo_int">vo_int</a></li>
+    <li><a data-toggle="tab" href="#vo_float">vo_float</a></li>
+    <li><a data-toggle="tab" href="#vo_bool">vo_bool</a></li>
+</ul>
+<div class="tab-content">
+    <div id="vo_string" class="tab-pane fade in active">
+        <div class="well">
+            <img src="https://event-engine.io/api/img/vo_string.gif" alt="Value Object Template vo_string" title="Value Object Template vo_string">
+        </div>
+    </div>
+    <div id="vo_int" class="tab-pane fade in">
+        <div class="well">
+            <img src="https://event-engine.io/api/img/vo_int.gif" alt="Value Object Template vo_int" title="Value Object Template vo_int">
+        </div>
+    </div>
+    <div id="vo_float" class="tab-pane fade in">
+        <div class="well">
+            <img src="https://event-engine.io/api/img/vo_float.gif" alt="Value Object Template vo_float" title="Value Object Template vo_float">
+        </div>
+    </div>
+    <div id="vo_bool" class="tab-pane fade in">
+        <div class="well">
+            <img src="https://event-engine.io/api/img/vo_bool.gif" alt="Value Object Template vo_bool" title="Value Object Template vo_bool">
+        </div>
+    </div>
+</div>
+<h2 id="3-4-3">Specialized Scalar Types</h2>
+<h3 id="3-4-3-1">vo_uuid</h3>
+<p>A UUID value object template is included, too. It works with the well known <a href="https://github.com/ramsey/uuid">ramsey/uuid</a> library.
+Along with the <code>vo_uuid</code> template you also get a <code>use_uuid</code> template. Use them in combination like shown in the example:</p>
+<p><img src="https://event-engine.io/api/img/vo_uuid.gif" alt="Value Object Template vo_uuid"></p>
+<h3 id="3-4-3-2">vo_datetime</h3>
+<p>The <code>vo_datetime</code> is another specialized scalar value object template. It uses PHP's built-in <code>\DateTimeImmutable</code>, ensures
+<code>UTC</code> is used as well as a standard format for from/to string conversion.</p>
+<p>The <code>FORMAT</code> constant can be used to change the format. By default it is <code>'Y-m-d\TH:i:s.u</code>, which is the same format as of the <code>Message::createdAt</code> property.</p>
+<p><img src="https://event-engine.io/api/img/vo_datetime.gif" alt="Value Object Template vo_datetime"></p>
+<h2 id="3-4-4">List / Collection</h2>
+<p>If you need a list or collection with all items being of the same type you can use the <code>vo_collection</code> template. It generates quite a lot of code so that you can work with the list
+out-of-box. Feel free to add more methods, either to the template or after code generation if it is specific to the concrete class.</p>
+<p>The template needs two information:</p>
+<ol>
+<li>The item class. The item class should at least have a <code>public static from&lt;RawType&gt;($rawType)</code> method, a <code>public to&lt;RawType&gt;()</code> method and a <code>public equals(ItemClass $other): bool</code> method.
+Of course all immutable objects generated with our VO templates can be used as item class.</li>
+<li>The raw type of the items, one of: <code>string, int, float, bool, array</code>
+</li>
+</ol>
+<p><img src="https://event-engine.io/api/img/vo_collection.gif" alt="Value Object Template vo_collection"></p>
+<p class="alert alert-warning">If you use the <code>push()</code> and <code>pop()</code> methods, keep in mind that the list is immutable. That said, only the returned list contains the change (item appended, last item removed).
+This also means, that you have to use <code>last()</code> before <code>pop()</code> to get the last item of the list.</p>
+<h2 id="3-4-5">Complex Types</h2>
+<p>Immutable objects can have arbitrary complexity. So far we only learned about single value objects and lists. What's missing is the ability to combine them to complex objects/types.
+A simple PHPStorm Live Template is not suitable for the job. Hence, <code>EventEngine\Data</code> provides the interface <code>ImmutableRecord</code> and the trait <code>ImmutableRecordLogic</code> to help you out.</p>
+<p class="alert alert-info">When you use PHPStorm and import the <strong>settings.zip</strong> linked above, you have a new file template <strong>ImmutableRecord</strong> that you can choose when adding a new class to the project.
+The template for <strong>getter</strong> methods is also aligned. <strong>ImmutableRecord</strong> requires getter methods that exactly match with the properties they provide read access to. Hence, the <strong>get</strong> prefix
+is removed in the file template. The example shows both in action.</p>
+<p>These are the steps required to get a working <code>ImmutableRecord</code>:</p>
+<ol>
+<li>Create a class that implements <code>ImmutableRecord</code> and uses the <code>ImmutableRecordLogic</code> trait (either use the file template or create the class by hand).</li>
+<li>Add properties and their types. You can use the live template <code>record_field</code>, which also adds a constant for each property to avoid typos.</li>
+<li>Generate getter methods for the properties with appropriate return types. The getter methods should be named like the properties.</li>
+</ol>
+<p class="alert alert-info"><strong>ImmutableRecordLogic</strong> relies on the return types of getter methods to know which property type class should be used when creating a record instance from raw data.</p>
+<p><img src="https://event-engine.io/api/img/immutable_record.gif" alt="Immutable Record"></p>
+<h3 id="3-4-5-1">fromArray vs. fromRecordData</h3>
+<p>By default <code>ImmutableRecordLogic</code> provides two ways to instantiate an object:</p>
+<ul>
+<li>
+<code>fromArray()</code>: create the record from an array containing raw data, especially useful when mapping user input or database results.</li>
+<li>
+<code>fromRecordData()</code>: create the record from value objects.</li>
+</ul>
+<pre><code class="language-php">&lt;?php
+declare(strict_types=1);
+
+namespace ProophExample;
+
+use ProophExample\ValueObject\GivenName;
+use ProophExample\ValueObject\Person;
+use ProophExample\ValueObject\UserId;
+use Ramsey\Uuid\Uuid;
+
+$john = Person::fromArray([
+    Person::USER_ID =&gt; Uuid::uuid4()-&gt;toString(),
+    Person::NAME =&gt; 'John',
+    Person::AGE =&gt;  42
+]);
+
+$jane = Person::fromRecordData([
+    Person::USER_ID =&gt; UserId::generate(),
+    Person::NAME =&gt; GivenName::fromString('Jane')
+]);
+
+</code></pre>
+<p class="alert alert-info">It is recommended to add named constructors to a record class
+using the <a class="alert-link" href="https://martinfowler.com/bliki/UbiquitousLanguage.html">Ubiquitous Language</a> of the domain.
+Those methods can use <code>fromRecordData()</code> internally.</p>
+<p>For example we could add a <code>register()</code> method to our <code>Person</code> class. The <code>UserId</code> is generated internally and <code>Age</code> is nullable and is not required by default.</p>
+<pre><code class="language-php">&lt;?php
+declare(strict_types=1);
+
+namespace ProophExample\ValueObject;
+
+use EventEngine\Data\ImmutableRecord;
+use EventEngine\Data\ImmutableRecordLogic;
+
+final class Person implements ImmutableRecord
+{
+    use ImmutableRecordLogic;
+
+    public const USER_ID = 'userId';
+    public const NAME = 'name';
+    public const AGE = 'age';
+
+    /**
+     * @var Age|null
+     */
+    private $age;
+
+    /**
+     * @var GivenName
+     */
+    private $name;
+
+    /**
+     * @var UserId
+     */
+    private $userId;
+
+    public static function register(GivenName $givenName): self
+    {
+        return self::fromRecordData([
+            self::USER_ID =&gt; UserId::generate(),
+            self::NAME =&gt; $givenName
+        ]);
+    }
+
+    /* ... getter methods */
+}
+
+</code></pre>
+<h3 id="3-4-5-2">Nullable Properties</h3>
+<p class="alert alert-warning"><strong>ImmutableRecordLogic</strong> validates the given data. If a property (or to be more precise the return type of the corresponding getter method) is not marked as nullable, then it throws an exception.
+Property data validation is delegated to the property type classes. You don't have to replicate it.</p>
+<h3 id="3-4-5-3">Array Properties</h3>
+<p>It's recommended to use the <code>vo_collection</code> live template (see above) to generate lists/collections as immutable types. Such a type class can then be used for a record property.
+However, in some cases you might want to use a plain php array instead of an extra class to keep a list of items in a record property. In that case you have to add a <code>private static arrayPropItemTypeMap(): array</code> method,
+that returns a mapping of <strong>property name to type class</strong>. PHP does not provide a way to specify array item types in return types (yet). Hence, <code>ImmutableRecordLogic</code> needs a hint.</p>
+<p>Let's look at an example. We a add a <code>friends</code> property to our <code>Person</code> record, define array as property/return type and provide a mapping that friends are also of type <code>Person</code>.</p>
+<p><img src="https://event-engine.io/api/img/immutable_record_array_prop.gif" alt="Immutable Record with array prop"></p>
+<h3 id="3-4-5-4">Initialize Properties</h3>
+<p>If we replace the plain array type of the previous example with the <code>FriendsList</code> generated earlier, our <code>Person</code> class would look like this:</p>
+<pre><code class="language-php">&lt;?php
+declare(strict_types=1);
+
+namespace ProophExample\ValueObject;
+
+use EventEngine\Data\ImmutableRecord;
+use EventEngine\Data\ImmutableRecordLogic;
+
+final class Person implements ImmutableRecord
+{
+    use ImmutableRecordLogic;
+
+    public const USER_ID = 'userId';
+    public const NAME = 'name';
+    public const AGE = 'age';
+    public const FRIENDS = 'friends';
+
+    /**
+     * @var FriendsList
+     */
+    private $friends;
+
+
+    /**
+     * @var Age|null
+     */
+    private $age;
+
+    /**
+     * @var GivenName
+     */
+    private $name;
+
+    /**
+     * @var UserId
+     */
+    private $userId;
+    
+    public static function register(GivenName $givenName): self
+    {
+        return self::fromRecordData([
+            self::USER_ID =&gt; UserId::generate(),
+            self::NAME =&gt; $givenName
+        ]);
+    }
+
+    /**
+     * @return FriendsList
+     */
+    public function friends(): FriendsList
+    {
+        return $this-&gt;friends;
+    }
+
+
+    /* ... other getter methods */
+}
+
+</code></pre>
+<p class="alert alert-light">Again: no extra mapping required! Try to favor collection classes over plain arrays!</p>
+<p>When a new person registers for our service their friends list would be empty. Hence, we don't want to require that property in the <code>register()</code> named constructor.
+On the other hand we also don't want to make the <code>friendsList</code> property nullable. Iterating over an empty list results in no iteration at all. No need to check against null first.
+To solve the conflict we can override the empty <code>init()</code> method of <code>ImmutableRecordLogic</code>. The method is called after all properties have been set, but before the null check is performed
+(which would result in an exception for the current <code>Person::register()</code> implementation).</p>
+<pre><code class="language-php">&lt;?php
+declare(strict_types=1);
+
+namespace ProophExample\ValueObject;
+
+use EventEngine\Data\ImmutableRecord;
+use EventEngine\Data\ImmutableRecordLogic;
+
+final class Person implements ImmutableRecord
+{
+    use ImmutableRecordLogic;
+
+    public const USER_ID = 'userId';
+    public const NAME = 'name';
+    public const AGE = 'age';
+    public const FRIENDS = 'friends';
+
+    /**
+     * @var FriendsList
+     */
+    private $friends;
+
+
+    /**
+     * @var Age|null
+     */
+    private $age;
+
+    /**
+     * @var GivenName
+     */
+    private $name;
+
+    /**
+     * @var UserId
+     */
+    private $userId;
+
+    public static function register(GivenName $givenName): self
+    {
+        return self::fromRecordData([
+            self::USER_ID =&gt; UserId::generate(),
+            self::NAME =&gt; $givenName
+        ]);
+    }
+
+    private function init(): void
+    {
+        if(null === $this-&gt;friends) {
+            $this-&gt;friends = FriendsList::emptyList();
+        }
+    }
+
+    /* ... getter methods */
+}
+
+</code></pre>
+<p class="alert alert-danger">Never override <code>__construct()</code> of <strong>ImmutableRecodLogic</strong>!
+Always use the <code>init()</code> hook for setting default values.</p>
+</div>        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="links">
+        <div class="container">
+            <div class="row">
+                <div class="prev col-xs-6">
+                                            <a href="https://event-engine.io/api/functional_flavour.html">Previous</a>                                    </div>
+                <div class="next col-xs-6">
+                                            <a href="https://event-engine.io/api/document_store/">Next</a>                                    </div>
+            </div>
+        </div>
+    </div>
+    <div id="copyright">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <p><a href="http://prooph-software.de/about.html">Imprint</a> | Powered by <a href="https://github.com/tobiju/bookdown-bootswatch-templates" title="Visit project to generate your own docs">Bookdown Bootswatch Templates</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+</div>
+<span id="forkongithub"><a href="https://github.com/proophsoftware/event-machine-docs">Fork me on GitHub</a></span><script src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+        integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+        crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/lunr.js/0.6.0/lunr.min.js"></script>
+<script src="//bartaz.github.io/sandbox.js/jquery.highlight.js"></script>
+<script src="//tobiju.github.io/share/prismjs/main.js"></script>
+<script src="//tobiju.github.io/share/prismjs/prism.js"></script>
+<script type="text/javascript">
+
+    function Search() {
+        this.store = {};
+        this.index = lunr(function () {
+            this.ref('id');
+            this.field('title', {boost: 10});
+            this.field('content');
+        });
+        this.searchResults = $('.js-search-results').addClass('list-search-results');
+    }
+
+    Search.prototype = {
+        constructor: Search,
+        init: function () {
+            this.createIndex();
+            this.bindEvents();
+        },
+        createIndex: function () {
+            var $this = this,
+                indexFilePath = $('.js-search-input').data('roothref') + 'index.json';
+
+            $.getJSON(indexFilePath, function (data) {
+                $.each(data, function (key, item) {
+                    $this.index.add({
+                        id: item.id,
+                        title: item.title,
+                        content: item.content
+                    });
+
+                    $this.store[item.id] = {
+                        href: item.id,
+                        title: item.title,
+                        content: item.content
+                    }
+                });
+            });
+        },
+        bindEvents: function () {
+            var $this = this;
+
+            $('html')
+                .on('click', function (event) {
+                    $this.close($(this), event);
+                });
+
+            $('.js-search-input, .js-search-results')
+                .on('click', function (event) {
+                    $this.click($(this), event);
+                });
+
+            $('.js-search-input')
+                .on('focus', function (event) {
+                    $this.focus($(this), event);
+                })
+                .on('keyup', function (event) {
+                    $this.search($(this), event)
+                })
+                .on('keydown', function (event) {
+                    if ($('.js-search-results ul').is(':visible')){
+                        $this.navigation($(this), event)
+                    }
+                })
+        },
+        click: function (element, event) {
+            event.stopPropagation();
+        },
+        focus: function (element, event) {
+            this.searchInputWidth = element.css('width');
+            element.animate({
+                'width': 600
+            }, 500);
+            $('#js-navbar-collapse > ul').fadeOut();
+        },
+        close: function (element, event) {
+            var $this = this;
+
+            $('.js-search-results').hide();
+            $('.js-search-input').animate({
+                'width': $this.searchInputWidth
+            }, 500);
+            $('#js-navbar-collapse > ul').fadeIn();
+        },
+        search: function (element, event) {
+            var $this = this;
+
+            if (event.keyCode == 13 || event.keyCode == 38 || event.keyCode == 40) {
+                return;
+            }
+
+            var query = element.val(),
+                results = $this.index.search(query);
+
+            if (!results.length) {
+                $this.searchResults.empty();
+                return;
+            }
+
+            var resultsList = results.reduce(function (ul, result) {
+                var item = $this.store[result.ref];
+                var title = $('<b>').text(item.title);
+
+                var cropText = $this.cropText(item.content, query);
+                if (cropText.length === 0) {
+                    cropText = $('<p>').html(item.content.substring(0, 120) + "...");
+                }
+                var content = content = $('<p>').html(cropText);
+
+                var div = $('<div>')
+                    .append(title)
+                    .append(content);
+                var a = $('<a>').attr('href', item.href)
+                    .append(div);
+                var li = $('<li>')
+                    .append(a);
+                ul.append(li);
+
+                return ul;
+            }, $('<ul>'));
+
+            this.searchResults.html(resultsList);
+
+            $('.js-search-results').show();
+            $(".js-search-results li:first-child").addClass('selected');
+        },
+        cropText: function (content, query) {
+            var cropedText = '',
+                re = new RegExp("\\s?(.{0,30})?" + query + ".*?\\b(.{0,30}.)?\\s?", "gi");
+
+            $.each(content.match(re), function (key, value) {
+                cropedText += '...' + value + '...';
+            });
+
+            return cropedText;
+        },
+        navigation: function (element, event) {
+            var selected = null,
+                listSelector = ".js-search-results ul",
+                listItemSelector = listSelector + " li",
+                selectedListItemSelector = listItemSelector + ".selected",
+                selectedListItemSelectorAnchor = listItemSelector + ".selected a";
+
+            // enter
+            if (event.keyCode == 13) {
+                event.preventDefault();
+                this.close();
+                window.location.replace($(selectedListItemSelectorAnchor).attr('href'));
+            }
+
+            // up
+            if (event.keyCode == 38) {
+                selected = $(selectedListItemSelector);
+                $(listItemSelector).removeClass("selected");
+
+                if (selected.prev().length == 0) {
+                    selected.siblings().last().addClass("selected");
+                } else {
+                    selected.prev().addClass("selected");
+                }
+
+                selected = $(selectedListItemSelector);
+                this.scrollListUp(selected);
+            }
+
+            // down
+            if (event.keyCode == 40) {
+                selected = $(selectedListItemSelector);
+                $(listItemSelector).removeClass("selected");
+
+                if (selected.next().length == 0) {
+                    selected.siblings().first().addClass("selected");
+                } else {
+                    selected.next().addClass("selected");
+                }
+
+                selected = $(selectedListItemSelector);
+                this.scrollListDown(selected);
+            }
+        },
+        scrollListDown: function (element) {
+            var ul = element.parent(),
+                ulHeight = ul.height(),
+                ulBottomPosition = ulHeight + ul.scrollTop(),
+                liBottomPosition = element.position().top + element.height();
+
+            if (liBottomPosition > ulBottomPosition) {
+                ul.scrollTop(liBottomPosition - ulHeight);
+            }
+
+            if (element.is(':first-child')) {
+                ul.scrollTop(0);
+            }
+        },
+        scrollListUp: function (element) {
+            var ul = element.parent(),
+                ulTopPosition = ul.scrollTop(),
+                liTopPosition = element.position().top;
+
+            if (liTopPosition < ulTopPosition) {
+                ul.scrollTop(element.position().top);
+            }
+
+            if (element.is(':last-child')) {
+                ul.scrollTop(element.position().top - element.height());
+            }
+        }
+    };
+
+    $(function () {
+        var search = new Search();
+        search.init();
+    });
+</script>
+<script src="https://bartaz.github.io/sandbox.js/jquery.highlight.js"></script>
+</body></html>

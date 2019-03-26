@@ -1,0 +1,1532 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
+<meta name="HandheldFriendly" content="True"/>
+<title>Part IV - Projections and Queries</title>
+<link rel="shortcut icon" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/prooph-logo@0.5x.png">
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/apple-touch-icon-144-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/apple-touch-icon-114-precomposed.png">
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/apple-touch-icon-72-precomposed.png">
+<link rel="apple-touch-icon-precomposed" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/apple-touch-icon-57-precomposed.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@prooph_software">
+<meta name="twitter:title" content="Event Machine">
+<meta name="twitter:description" content="Rapid CQRS / ES framework for PHP with a path to refactor towards a richer domain model as needed.">
+<meta name="twitter:image" content="https://proophsoftware.github.io/event-machine/img/Event_Machine_Intro.png">
+    <link rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/lumen/bootstrap.min.css">
+<link rel="stylesheet"
+      href="https://tobiju.github.io/share/prismjs/prism-ghcolors.css"/>
+<link rel="stylesheet"
+      href="https://tobiju.github.io/share/prismjs/prism-linenumbers.css"/>
+<style>
+    body, html {
+        height: 100%;
+        padding-top: 36px;
+        position: relative;
+    }
+
+    img {
+        max-width: 100%;
+    }
+
+    code span {
+        white-space: nowrap;
+    }
+    code span.comment {
+        white-space: pre;
+    }
+
+    .highlight {
+        background: #FFFF88;
+    }
+
+    .page-wrapper {
+        min-height: 100%;
+        padding-bottom: 170px;
+        position: relative;
+    }
+
+    .box-header {
+        position: relative;
+    }
+
+    /* Header Section */
+    header {
+        background: white;
+        color: black;
+        font-size: 16px;
+        font-weight: 300;
+    }
+
+    h1:first-child {
+        margin-top: 0;
+    }
+
+    /* anchor link will be displayed after the static top nav */
+    h1:before,
+    h2:before,
+    h3:before,
+    h4:before,
+    h5:before,
+    h6:before {
+        display: block;
+        content: " ";
+        margin-top: -64px;
+        height: 64px;
+        visibility: hidden;
+    }
+
+    .navbar-brand {
+        padding: 0;
+    }
+
+    .navbar-brand img {
+        max-height: 100%;
+    }
+
+    /* Content Section */
+    #content {
+        margin-bottom: 17px;
+        font-size: 17px;
+        min-height: 200px;
+    }
+
+    .breadcrumb {
+        position: relative;
+        z-index: 999;
+    }
+
+    .links {
+        background: #f8f8f8;
+        border-top: 1px solid #e5e5e5;
+        border-bottom: 1px solid #e5e5e5;
+        padding: 16px 0;
+    }
+
+    .links .prev {
+        text-align: left;
+    }
+
+    .links .parent {
+        text-align: center;
+    }
+
+    .links .next {
+        text-align: right;
+    }
+
+    /* Search */
+    .form-search {
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 999;
+    }
+
+    @media (max-width: 767px) {
+        .form-search {
+            position: relative;
+            margin-top: 0;
+        }
+    }
+
+    .form-search .form-control {
+        border: 0;
+        width: 80px;
+    }
+
+    @media (max-width: 767px) {
+        .form-search .form-control {
+            width: 100% !important;
+        }
+    }
+
+    .form-search .list-search-results {
+        position: relative;
+    }
+
+    .form-search .list-search-results ul {
+        background: #eee;
+        border: 1px solid inherit;
+        list-style: none;
+        max-height: 300px;
+        overflow: auto;
+        padding: 0;
+        position: absolute;
+        width: 100%;
+        z-index: 999;
+    }
+
+    .form-search .list-search-results ul li:nth-child(even) {
+        background: rgba(255, 255, 255, 0.3)
+    }
+
+    .form-search .list-search-results ul li.selected {
+        background: #ccc;
+    }
+
+    .form-search .list-search-results ul li a {
+        display: block;
+        padding: 4px 8px;
+    }
+
+    /* TOC */
+    .list-toc {
+        padding: 0;
+    }
+
+    .list-toc .list-group-item {
+        background: 0 none;
+        position: relative;
+        font-weight: bold;
+        padding: 0;
+        margin: 0;
+    }
+
+    .list-toc li .text-number {
+        padding-left: 20px;
+    }
+    .list-toc li li .text-number {
+        padding-left: 40px;
+    }
+    .list-toc li li li .text-number {
+        padding-left: 60px;
+    }
+    .list-toc li li li li .text-number {
+        padding-left: 80px;
+    }
+    .list-toc li li li li li .text-number {
+        padding-left: 100px;
+    }
+    .list-toc .text-number {
+        padding-left: 100px;
+    }
+
+    .list-toc .list-group-item .row {
+        padding: 7px 0 7px;
+    }
+
+    .list-toc .list-group-item .bbt-toc-toggle {
+        display: block;
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        font-weight: normal;
+    }
+
+    .list-toc .list-group-item .bbt-toc-toggle:before {
+        content: "";
+        display: block;
+    }
+
+    .list-toc .list-group-item .bbt-toc-toggle.collapsed:before {
+        content: "";
+        display: block;
+    }
+
+    .list-toc > li:nth-child(2n+1) {
+        background: rgba(0, 0, 0, 0.03);
+    }
+
+    .bbt-theme-cyborg .list-toc > li:nth-child(2n+1),
+    .bbt-theme-darkly .list-toc > li:nth-child(2n+1),
+    .bbt-theme-slate .list-toc > li:nth-child(2n+1),
+    .bbt-theme-superhero .list-toc > li:nth-child(2n+1) {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .list-toc .list-group-item {
+        border-bottom: 0 none;
+        border-left: 0 none;
+        border-right: 0 none;
+        font-size: inherit;
+    }
+
+    .list-toc .list-group-item:first-child {
+        border-top-right-radius: 0;
+        border-top-left-radius: 0;
+    }
+
+    .list-toc .list-group-item:last-child {
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    /* Left navigation */
+    .nav-left ul li a {
+        padding-top: 3px;
+        padding-bottom: 3px;
+        border-left: 1px solid transparent;
+    }
+
+    .nav-left ul li.active a,
+    .nav-left ul li a:hover {
+        background: none !important;
+        color: inherit;
+        border-color: inherit;
+    }
+
+    .navbar-top {
+        position: relative;
+    }
+
+    .affix {
+        top: 60px;
+    }
+
+    .badge {
+        border-radius: 4px;
+        padding: 5px;
+    }
+
+    /* Footer Section */
+    footer {
+        color: black;
+        background: white;
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+    }
+
+    footer #copyright {
+        padding: 30px;
+        text-align: center;
+        color: #444;
+    }
+
+    footer #copyright p {
+        margin: 0;
+    }
+
+    footer #copyright span a {
+        color: white;
+    }
+
+    /* Top Navigation */
+    @media (max-width: 767px) {
+        ul.navbar-nav {
+            margin: 0 -15px
+        }
+
+        ul.navbar-nav li {
+            border-radius: 0;
+        }
+
+        ul.navbar-nav li ul {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            display: block;
+            float: none;
+            left: auto;
+            padding: 0;
+            position: static;
+        }
+
+        ul.navbar-nav li ul li a {
+            padding: 8px 30px;
+        }
+
+        ul.navbar-nav li ul li ul li a {
+            padding: 6px 40px;
+        }
+    }
+
+    @media (min-width: 768px) {
+
+        ul.navbar-nav li {
+            display: block;
+            position: relative;
+            float: left;
+        }
+
+        ul.navbar-nav li ul {
+            display: none;
+        }
+
+        ul.navbar-nav li a {
+            display: block;
+        }
+
+        ul.navbar-nav li:hover > ul {
+            display: block;
+            position: absolute;
+        }
+
+        ul.navbar-nav li:hover li {
+            float: none;
+        }
+
+        ul.navbar-nav ul ul {
+            left: 100%;
+            top: 0;
+        }
+    }
+</style>
+    <style>
+    body {
+        font-size: 16px;
+    }
+    /* Header Section */
+    header {
+        font-size: 17px;
+        font-weight: 400;
+    }
+
+    .dropdown-menu {
+        font-size: 17px;
+    }
+
+    .alert-light {
+        color: #818182;
+        background-color: #fefefe;
+    }
+
+    .alert-dark {
+        color: #1b1e21;
+        background-color: #d6d8d9;
+        border-color: #c6c8ca;
+    }
+
+    .prooph-logo {
+        float: left;
+        margin-left: 8px;
+        margin-right: 8px;
+        transition-timing-function: ease-in-out;
+        transition: all 5s;
+        height: 50px;
+        padding: 5px;
+    }
+
+    .jumbotron {
+       background-color: #04A1B0;
+    }
+
+    .jumbotron .display-1 {
+        color: white;
+    }
+
+    .jumbotron .display-2 {
+        color: white;
+    }
+
+    .jumbotron pre {
+        display: block;
+        color: #f8f8f2;
+        font-size: 13px;
+        margin-top: 60px;
+        border-radius: 0;
+        border: none;
+        background: #272822;
+        padding: 1em;
+        padding-bottom: 0px;
+        overflow: auto;
+        text-shadow: 0 1px rgba(0,0,0,0.3);
+        font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+        text-align: left;
+        white-space: pre;
+        word-spacing: normal;
+        word-break: normal;
+        word-wrap: normal;
+        line-height: 1.5;
+        -moz-tab-size: 4;
+        -o-tab-size: 4;
+        tab-size: 4;
+        -webkit-hyphens: none;
+        -moz-hyphens: none;
+        -ms-hyphens: none;
+        hyphens: none;
+    }
+
+    .jumbotron pre.line-numbers {
+        position: relative;
+        padding-left: 3.8em;
+        counter-reset: linenumber;
+    }
+
+    .jumbotron pre code {
+        color: white;
+        margin-left: -80px;
+    }
+
+
+    h2.front {
+        text-align: center;
+        font-size: 56px;
+        margin-top: 100px;
+        padding: 20px;
+    }
+
+    .intro {
+        margin-top: 30px;
+        font-size: 24px;
+        font-weight: 200;
+    }
+
+    .intro.sub-intro {
+        margin-top: 15px;
+        margin-bottom: 15px;
+    }
+
+    .flavour {
+        height: 200px;
+    }
+
+    .flavour h3 {
+        color: white;
+        font-size: 30px;
+    }
+
+    .flavour h3 small {
+        color: #f2f2f2;
+        font-size: 20px;
+    }
+
+    .flavour.prototyping {
+        background-color: #CC3340;
+    }
+
+    .flavour.functional {
+        background-color: #EB6842;
+    }
+
+    .flavour.oop {
+        background-color: #715671;
+    }
+
+    .flavour.mixed {
+        background-color: #26896C;
+    }
+
+    .btn-get-started {
+        background-color: #04A1B0;
+        color: white;
+        padding: 20px 26px;
+        font-size: 35px;
+        border-radius: 8px;
+        width: 100%;
+        -webkit-transition-duration: 0.4s; /* Safari */
+        transition-duration: 0.4s;
+    }
+
+    .btn-get-started:hover {
+        background-color: #04c8d7;
+        color: white;
+        border-bottom-width: 4px;
+        margin-top: 0px;
+    }
+
+    .img-center {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        width: 50%;
+    }
+
+
+    #forkongithub a {
+        background: #000;
+        color: #fff;
+        text-decoration: none;
+        font-family: arial, sans-serif;
+        text-align: center;
+        font-weight: bold;
+        padding: 5px 40px;
+        font-size: 1rem;
+        line-height: 2rem;
+        position: relative;
+        transition: 0.5s;
+    }
+
+    #forkongithub a:hover {
+        background: #c11;
+        color: #fff;
+    }
+
+    #forkongithub a::before, #forkongithub a::after {
+        content: "";
+        width: 100%;
+        display: block;
+        position: absolute;
+        top: 1px;
+        left: 0;
+        height: 1px;
+        background: #fff;
+    }
+
+    #forkongithub a::after {
+        bottom: 1px;
+        top: auto;
+    }
+
+    @media screen and (min-width: 800px) {
+        #forkongithub {
+            position: fixed;
+            display: block;
+            top: 0;
+            right: 0;
+            width: 200px;
+            overflow: hidden;
+            height: 200px;
+            z-index: 1000;
+        }
+
+        #forkongithub a {
+            width: 200px;
+            position: absolute;
+            top: 80px;
+            right: -60px;
+            transform: rotate(45deg);
+            -webkit-transform: rotate(45deg);
+            -ms-transform: rotate(45deg);
+            -moz-transform: rotate(45deg);
+            -o-transform: rotate(45deg);
+            box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.8);
+        }
+    }
+
+    @media screen and (max-width: 799px) {
+        .jumbotron {
+            margin-top: 60px;
+        }
+    }
+
+    @media screen and (max-width: 991px) {
+        .jumbotron pre {
+            display: none;
+        }
+
+        .flavour {
+            margin-top: 60px;
+        }
+    }
+</style>
+</head>
+<body data-spy="scroll" data-target="#sideNav" data-offset="50" class="bbt-theme-lumen">
+<div class="page-wrapper">
+    <header>
+    
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="box-header container">
+        <form class="form-search navbar-form navbar-right" role="search">
+            <div class="form-group">
+                <input type="text"
+                       placeholder="Search"
+                       class="js-search-input form-control"
+                       data-roothref="https://event-engine.io/">
+
+                <div class="js-search-results"></div>
+            </div>
+        </form>
+
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#js-navbar-collapse" aria-expanded="false">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="https://event-engine.io/">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" class="prooph-logo">
+                    <defs>
+                        <style>
+                            .cls-1{fill:#04a1b0;}.cls-2{fill:#26896c;}.cls-3{fill:#eeca50;}.cls-4{fill:#eb6842;}.cls-5{fill:#cc3340;}.cls-6{fill:#715671;}
+                        </style>
+                    </defs>
+                    <title>prooph-logo</title>
+                    <g id="artwork">
+                        <g id="Layer_5" data-name="Layer 5">
+                            <path class="cls-1"
+                                  d="M57.22,17,67.84,35.43a1.77,1.77,0,0,0,1.53.89h61.25a1.77,1.77,0,0,0,1.53-.89L142.78,17a1.77,1.77,0,0,0-1.53-2.66H58.76A1.77,1.77,0,0,0,57.22,17Z"/>
+                            <path class="cls-2"
+                                  d="M29.54,94.68l30.63-53a1.77,1.77,0,0,0,0-1.77L49.55,21.48a1.77,1.77,0,0,0-3.07,0L5.24,92.91a1.77,1.77,0,0,0,1.53,2.66H28A1.77,1.77,0,0,0,29.54,94.68Z"/>
+                            <path class="cls-3"
+                                  d="M60.16,158.36l-30.63-53a1.77,1.77,0,0,0-1.53-.89H6.78a1.77,1.77,0,0,0-1.53,2.66l41.24,71.43a1.77,1.77,0,0,0,3.07,0l10.61-18.38A1.77,1.77,0,0,0,60.16,158.36Z"/>
+                            <path class="cls-4"
+                                  d="M130.63,163.68H69.37a1.77,1.77,0,0,0-1.53.89L57.22,183a1.77,1.77,0,0,0,1.53,2.66h82.48a1.77,1.77,0,0,0,1.53-2.66l-10.61-18.38A1.77,1.77,0,0,0,130.63,163.68Z"/>
+                            <path class="cls-5"
+                                  d="M170.46,105.32l-30.63,53a1.77,1.77,0,0,0,0,1.77l10.61,18.38a1.77,1.77,0,0,0,3.07,0l41.24-71.43a1.77,1.77,0,0,0-1.53-2.66H172A1.77,1.77,0,0,0,170.46,105.32Z"/>
+                            <path class="cls-6"
+                                  d="M139.84,41.64l30.63,53a1.77,1.77,0,0,0,1.53.89h21.23a1.77,1.77,0,0,0,1.53-2.66L153.52,21.48a1.77,1.77,0,0,0-3.07,0L139.84,39.86A1.77,1.77,0,0,0,139.84,41.64Z"/>
+                        </g>
+                    </g>
+                </svg>
+            </a>
+
+        </div>
+
+        <div class="collapse navbar-collapse" id="js-navbar-collapse">
+            
+    
+    <ul class="nav navbar-nav">
+                        <li>
+    <a href="https://event-engine.io/intro/">Introduction</a>
+    
+    <ul class="dropdown-menu">
+                        <li>
+    <a href="https://event-engine.io/intro/about.html">About Event Engine</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/intro/pros_and_cons.html">Pros and cons</a>
+
+    </li>
+            </ul>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/">Tutorial</a>
+    
+    <ul class="dropdown-menu">
+                        <li>
+    <a href="https://event-engine.io/tutorial/intro.html">Introduction</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/partI.html">Part I - Add A Building</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/partII.html">Part II - The Building Aggregate</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/partIII.html">Part III - Aggregate State</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/partIV.html">Part IV - Projections and Queries</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/partV.html">Part V - DRY</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/partVI.html">Part VI - Check in User</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/partVII.html">Part VII - The Unhappy Path</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/bonusI.html">Bonus I - Custom Projection</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/bonusII.html">Bonus II - Unit and Integration Tests</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/bonusIII.html">Bonus III - Functional Flavour</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/tutorial/bonusIV.html">Bonus IV - OOP Flavour</a>
+
+    </li>
+            </ul>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/api/">API</a>
+    
+    <ul class="dropdown-menu">
+                        <li>
+    <a href="https://event-engine.io/api/set_up/">Set Up</a>
+    
+    <ul class="dropdown-menu">
+                        <li>
+    <a href="https://event-engine.io/api/set_up/installation.html">Installation</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/api/set_up/di.html">Dependency Injection</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/api/set_up/production_optimization.html">Optimize For Production</a>
+
+    </li>
+            </ul>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/api/descriptions.html">Event Engine Descriptions</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/api/functional_flavour.html">Functional Flavour</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/api/immutable_state.html">Immutable State</a>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/api/document_store/">Document Store</a>
+    
+    <ul class="dropdown-menu">
+                        <li>
+    <a href="https://event-engine.io/api/document_store/set_up.html">Document Store</a>
+
+    </li>
+            </ul>
+
+    </li>
+                        <li>
+    <a href="https://event-engine.io/api/projections/">Projections</a>
+    
+    <ul class="dropdown-menu">
+                        <li>
+    <a href="https://event-engine.io/api/projections/set_up.html">Custom Projections</a>
+
+    </li>
+            </ul>
+
+    </li>
+            </ul>
+
+    </li>
+            </ul>
+
+        </div>
+    </div>
+</nav>
+</header>
+<div class="container">
+    <ol class="breadcrumb">
+                        <li><a href="https://event-engine.io/">Event Engine Docs</a></li>
+                                <li><a href="https://event-engine.io/tutorial/">Tutorial</a></li>
+                                <li class="active">Part IV - Projections and Queries</li>
+            </ol>
+    <div class="row">
+
+                <div class="col-md-3">
+            <nav class="nav-left hidden-xs hidden-sm" id="sideNav">
+    <ul class="nav nav-stacked" data-spy="affix" data-offset-top="59" role="tablist">
+                                <li>
+                <a href="#2-5" title="Part&#x20;IV&#x20;-&#x20;Projections&#x20;and&#x20;Queries">Part IV - Projections an...</a>
+            </li>
+                                <li>
+                <a href="#2-5-1" title="Permanent&#x20;Snapshots">Permanent Snapshots</a>
+            </li>
+                                <li>
+                <a href="#2-5-2" title="Query,&#x20;Resolver&#x20;and&#x20;Return&#x20;Type">Query, Resolver and Retu...</a>
+            </li>
+                                <li>
+                <a href="#2-5-3" title="Discolight&#x20;PSR-11&#x20;Container">Discolight PSR-11 Contai...</a>
+            </li>
+                                <li>
+                <a href="#2-5-4" title="Optional&#x20;Query&#x20;Arguments">Optional Query Arguments</a>
+            </li>
+            </ul>
+</nav>
+        </div>
+                <div class="col-md-9">
+<div id="section-main"><h1 id="2-5">Part IV - Projections and Queries</h1>
+<p>In part III of the tutorial we successfully implemented the first write model use case: <em>Add a new building</em>.
+Connect to the Postgres database and check the event stream table <code>_4228e4a00331b5d5e751db0481828e22a2c3c8ef</code>.
+The table should contain the first domain event yielded by the <code>Building</code> aggregate.</p>
+<table>
+<thead>
+<tr>
+<th>no</th>
+<th>event_id</th>
+<th>event_name</th>
+<th>payload</th>
+<th>metadata</th>
+<th>created_at</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>bce42506-...</td>
+<td>BuildingAdded</td>
+<td>{"buildingId":"9ee8d8a8-...","name":"Acme Headquarters"}</td>
+<td>{"_aggregate_id": "9ee8d8a8-...", "_causation_id": "e482f5b8-...", "_aggregate_type": "Building", "_causation_name": "AddBuilding", "_aggregate_version": 1}</td>
+<td>2018-02-14 22:09:32.039848</td>
+</tr>
+</tbody>
+</table>
+<p><em>If you're wondering why the event stream table has a sha1 hashed name this is because by default prooph/event-store uses that
+naming strategy to avoid database vendor specific character constraints. You can however configure a different
+naming strategy if you don't like it.</em></p>
+<p>The write model only needs an event stream to store information but the read side has a hard time querying it.
+As long as we only have a few events in the stream queries are simple and fast. But over time this table will
+grow and contain many different events. To stay flexible we need to
+separate the write side from the read side. An event sourced system normally uses <strong>projections</strong> to
+create materialized views of the application state and keep them in sync with the write model.</p>
+<p class="alert alert-warning">The problem with projections is <a class="alert-link" href="https://en.wikipedia.org/wiki/Eventual_consistency">eventual consistency</a>.
+A highly distributed system has to deal with eventual consistency. In fact, many modern systems already deal with it in one way or the other,
+for example if you use Elastic Search or Redis next to your primary database.</p>
+<p class="alert alert-success">However, Event Engine gives you fine grained control of consistency versus performance and availability. All through an easy to use
+high level API. The tutorial only covers the tip of the iceberg. But for now it's enough to know that you have many options.
+Once you've internalized the basics, you can customize the skeleton to meet your needs.</p>
+<h2 id="2-5-1">Permanent Snapshots</h2>
+<p>As already discussed in the last tutorial part, Event Engine offers an alternative to async <strong>projections</strong> namely the <code>MultiModelStore</code>.
+You can think of it like a projection or a snapshot mechanism that runs within the same transaction as the write model does.
+The result is a snapshot of the aggregate state that is always in sync with its persisted events.
+Hence, it is safe to rely on the state without worrying about eventual consistency issues.</p>
+<p>If you look at the <code>buildings</code> table of the Postgres DB, you should see one row with two columns <code>id</code> and <code>doc</code>
+with id being the buildingId and doc being the JSON representation of the <code>Building\State</code>.</p>
+<p class="alert alert-light">Event Engine allows you to start with permanent snapshots and switch to async projections later by adjusting the configuration.</p>
+<h2 id="2-5-2">Query, Resolver and Return Type</h2>
+<p>We already know that Event Engine uses JSON Schema to describe message types and define validation rules.
+For queries we can also register <strong>return types</strong> in Event Engine and those return types will appear in the <strong>Model</strong> section of the Swagger UI.</p>
+<p>Registering types is done in <code>src/Domain/Api/Type</code>.</p>
+<pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace MyService\Domain\Api;
+
+use EventEngine\JsonSchema\JsonSchema;
+use EventEngine\JsonSchema\Type\ObjectType;
+use MyService\Domain\Model\Building;
+use EventEngine\EventEngine;
+use EventEngine\EventEngineDescription;
+
+class Type implements EventEngineDescription
+{
+    const BUILDING = 'Building';
+
+    private static function building(): ObjectType
+    {
+        return JsonSchema::object([
+            Building\State::BUILDING_ID =&gt; JsonSchema::uuid(),
+            Building\State::NAME =&gt; JsonSchema::string(),
+        ]);
+    }
+
+    /**
+     * @param EventEngine $eventEngine
+     */
+    public static function describe(EventEngine $eventEngine): void
+    {
+        $eventEngine-&gt;registerType(self::BUILDING, self::building());
+    }
+}
+
+</code></pre>
+<p>We describe <code>Building\State</code> using JSON Schema and register the type in Event Engine.</p>
+<p class="alert alert-warning"><em>Note: Using aggregate state as return type for queries couples the write model with the read model.
+However, you can replace the return type definition at any time. So we can use the short cut
+in an early stage and switch to a decoupled version later.</em></p>
+<p>Next step is to register the query in <code>src/Domain/Api/Query</code>:</p>
+<pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace MyService\Domain\Api;
+
+use EventEngine\EventEngine;
+use EventEngine\EventEngineDescription;
+use EventEngine\JsonSchema\JsonSchema;
+
+class Query implements EventEngineDescription
+{
+    const BUILDING = 'Building';
+
+    public static function describe(EventEngine $eventEngine): void
+    {
+        $eventEngine-&gt;registerQuery(self::BUILDING, JsonSchema::object([
+            'buildingId' =&gt; JsonSchema::uuid(),
+        ]))
+            -&gt;resolveWith(/* ??? */)
+            -&gt;setReturnType(JsonSchema::typeRef(Type::BUILDING));
+    }
+}
+
+</code></pre>
+<p>Queries are named like the "things" they return. This results in a clean and easy to use message box schema.</p>
+<p class="alert alert-light">Please note that the return type is a reference: <code>JsonSchema::typeRef()</code>.</p>
+<p>Last but not least, the query needs to be handled by a so-called resolver.
+Create a new class called <code>BuildingResolver</code> in a new directory <code>Resolver</code> in <code>src/Domain</code>.</p>
+<pre><code class="language-php">&lt;?php
+declare(strict_types=1);
+
+namespace MyService\Domain\Resolver;
+
+use EventEngine\Messaging\Message;
+use EventEngine\Querying\Resolver;
+
+final class BuildingResolver implements Resolver
+{
+    /**
+     * @param Message $query
+     * @return mixed
+     */
+    public function resolve(Message $query)
+    {
+        // TODO: Implement resolve() method.
+    }
+}
+
+</code></pre>
+<p>The <code>BuildingResolver</code> implements <code>EventEngine\Querying\Resolver</code>. It receives the query message as the only argument.</p>
+<p>Task of the resolver is to query the read model. While looking at snapshots and projections we briefly discussed
+Event Engine's <code>DocumentStore</code> API. The resolver can use it to access documents organized in collections. Let's see
+how that works.</p>
+<pre><code class="language-php">&lt;?php
+declare(strict_types=1);
+
+namespace MyService\Domain\Resolver;
+
+use EventEngine\DocumentStore\DocumentStore;
+use EventEngine\Messaging\Message;
+use EventEngine\Querying\Resolver;
+
+final class BuildingResolver implements Resolver
+{
+    /**
+     * @var DocumentStore
+     */
+    private $documentStore;
+
+    public function __construct(DocumentStore $documentStore)
+    {
+        $this-&gt;documentStore = $documentStore;
+    }
+
+    /**
+     * @param Message $query
+     * @return array
+     */
+    public function resolve(Message $query): array 
+    {
+        $buildingId = $query-&gt;get('buildingId');
+
+        $buildingDoc = $this-&gt;documentStore-&gt;getDoc('buildings', $buildingId);
+
+        if(!$buildingDoc) {
+            throw new \RuntimeException("Building not found", 404);
+        }
+
+        return $buildingDoc['state'];
+    }
+}
+
+</code></pre>
+<p>The implementation is self explanatory, but a few notes should be made.</p>
+<p>Each Event Engine message has a <code>get</code> and a <code>getOrDefault</code>
+method which are both short cuts to access keys of the message payload. The difference between the two is obvious.
+If the payload key is NOT set and you use <code>get</code> the message will throw an exception. If the payload key is NOT set and you use
+<code>getOrDefault</code> you get back the default passed as the second argument.</p>
+<p>The second note is about <code>$buildingDoc['state']</code>. The document store returns raw data stored as a document.
+And because we use the <code>MultiModeStore</code> to persist aggregate state, it is stored as a snapshot of the form:</p>
+<pre><code class="language-json">{
+  "id": "&lt;aggregate_id&gt;",
+  "doc": {
+    "state": {"state":  {"of":  "the aggregate"}},
+    "version": 1
+  }
+}
+</code></pre>
+<p>We don't want to expose internal storage format to public consumers. Therefor, the resolver only returns
+what is stored in the <code>state</code> property of the document.</p>
+<p class="alert alert-light">We could also use a DTO instead of returning an array to add more type safety to the resolver. The DTO should either has a <code>toArray</code> method
+or implement <code>\JsonSerializable</code> so that the message box can turn it into a JSON response. By the way, the message box is part of
+the skeleton. Feel free to adjust it, if you want to use a serializer library.</p>
+<p>Finally, we need to configure Event Engine's DI container to inject the dependencies into our new resolver.</p>
+<h2 id="2-5-3">Discolight PSR-11 Container</h2>
+<p>Event Engine can use any PSR-11 compatible container. By default it uses a very simple implementation called <code>Discolight</code> included
+in the Event Engine package family. The DI container is inspired by <code>bitExpert/disco</code> but removes the need for annotations.
+Dependencies are aggregated in a single <code>ServiceFactory</code> class which is located directly in <code>src</code>.</p>
+<p>The <code>ServiceFactory</code> pulls dependencies from modules. The skeleton organizes modules by system layers:</p>
+<ul>
+<li>
+<strong>Domain</strong>: contains everything related to the business logic</li>
+<li>
+<strong>Http</strong>: contains the message box and other PSR-15 middleware</li>
+<li>
+<strong>Persistence</strong>: contains classes and definitions related to storage</li>
+<li>
+<strong>System</strong>: contains things like a logger and the default HealthCheckResolver</li>
+</ul>
+<p>Each module has a <code>&lt;Module&gt;Services</code> trait, which is loaded into the <code>ServiceFactory</code>. It's an easy way to group dependencies using
+plain PHP. No configuration files, no magic and IDE support without extra plugins.</p>
+<p class="alert alert-light">When working with Event Engine you'll recognize that you don't need a heavy DI container. You have a single message box instead of a growing
+number of controllers. You don't have heavy application services, but small single purpose ones like the resolver we've just added.
+You don't need repositories for entities, because Event Engine manages persistence based on aggregate logic and descriptions.
+In fact, the entire CQRS / ES application architecture ensures that you use small building blocks and coordinate them by using messages.</p>
+<p>To set up the <code>BuildingResolver</code> adjust <code>src/Domain/DomainServices.php</code>:</p>
+<pre><code class="language-php">&lt;?php
+declare(strict_types=1);
+
+namespace MyService\Domain;
+
+use MyService\Domain\Api\Aggregate;
+use MyService\Domain\Api\Command;
+use MyService\Domain\Api\Event;
+use MyService\Domain\Api\Listener;
+use MyService\Domain\Api\Projection;
+use MyService\Domain\Api\Query;
+use MyService\Domain\Api\Type;
+use MyService\Domain\Resolver\BuildingResolver;
+
+trait DomainServices
+{
+    public function buildingResolver(): BuildingResolver
+    {
+        return $this-&gt;makeSingleton(BuildingResolver::class, function () {
+            return new BuildingResolver($this-&gt;documentStore());
+        });
+    }
+    
+    public function domainDescriptions(): array
+    {
+        return [
+            Type::class,
+            Command::class,
+            Event::class,
+            Query::class,
+            Aggregate::class,
+            Projection::class,
+            Listener::class,
+        ];
+    }
+}
+
+</code></pre>
+<p class="alert alert-light">A few notes about the trait. It uses methods defined in other <code>&lt;Module&gt;Services</code> traits or in the main <code>ServiceFactory</code>.
+PHPStorm can suggest and resolve methods, because all traits are combined in the ServiceFactory. This allows you to quickly navigate
+the dependency tree. Something that is really painful when using most other DI container solutions.</p>
+<p class="alert alert-light"><code>$this-&gt;makeSingleton()</code> is a helper method that turns the requested service in a singleton. All subsequent calls to <code>buildingResolver()</code> will
+return the same instance instead of a new one. Return services directly if the container should provide a new instance on each <code>$container-&gt;get(Service::class)</code> call.</p>
+<p class="alert alert-light"><code>domainDescriptions()</code> is a method required by the main <code>ServiceFactory</code>. It returns all Event Engine descriptions of the module so that
+they are registered in Event Engine.</p>
+<p>Finally, tell Event Engine that the <code>BuildingResolver</code> is responsible for the <code>Building</code> query:</p>
+<pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace MyService\Domain\Api;
+
+use EventEngine\EventEngine;
+use EventEngine\EventEngineDescription;
+use EventEngine\JsonSchema\JsonSchema;
+use MyService\Domain\Resolver\BuildingResolver;
+
+class Query implements EventEngineDescription
+{
+    const BUILDING = 'Building';
+
+    public static function describe(EventEngine $eventEngine): void
+    {
+        $eventEngine-&gt;registerQuery(self::BUILDING, JsonSchema::object([
+            'buildingId' =&gt; JsonSchema::uuid(),
+        ]))
+            -&gt;resolveWith(BuildingResolver::class)
+            -&gt;setReturnType(JsonSchema::typeRef(Type::BUILDING));
+    }
+}
+
+</code></pre>
+<p>Ok! We should be able to query buildings by buildingId now. Switch to Swagger and reload the schema (press the "explore" button).
+The Documentation Explorer should show a new Query:  <code>Building</code>.
+If we send that query with the <code>buildingId</code> used in <code>AddBuilding</code>:</p>
+<pre><code class="language-json">{
+  "buildingId": "9ee8d8a8-3bd3-4425-acee-f6f08b8633bb"
+}
+</code></pre>
+<p>We get back:</p>
+<pre><code class="language-json">{
+  "name": "Acme Headquarters",
+  "buildingId": "9ee8d8a8-3bd3-4425-acee-f6f08b8633bb"
+}
+</code></pre>
+<p>Awesome, isn't it?</p>
+<h2 id="2-5-4">Optional Query Arguments</h2>
+<p>Resolvers can also handle multiple queries. This is useful when different queries can be resolved by accessing the same
+read model collection. A second query for the <code>BuildingResolver</code> would be one that lists all buildings or a subset filtered
+by name.</p>
+<p>Add the query to <code>src/Domain/Api/Query</code>:</p>
+<pre><code class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace MyService\Domain\Api;
+
+use EventEngine\EventEngine;
+use EventEngine\EventEngineDescription;
+use EventEngine\JsonSchema\JsonSchema;
+use MyService\Domain\Resolver\BuildingResolver;
+
+class Query implements EventEngineDescription
+{
+    const BUILDING = 'Building';
+    const BUILDINGS = 'Buildings'; //&lt;-- New query, note the plural
+
+    public static function describe(EventEngine $eventEngine): void
+    {
+        $eventEngine-&gt;registerQuery(self::BUILDING, JsonSchema::object([
+            'buildingId' =&gt; JsonSchema::uuid(),
+        ]))
+            -&gt;resolveWith(BuildingResolver::class)
+            -&gt;setReturnType(JsonSchema::typeRef(Type::BUILDING));
+
+        //New query
+        $eventEngine-&gt;registerQuery(
+            self::BUILDINGS,
+            JsonSchema::object(
+                [], //No required arguments for this query
+                //Optional argument name, is a nullable string
+                ['name' =&gt; JsonSchema::nullOr(JsonSchema::string()-&gt;withMinLength(1))]
+            )
+        )
+            //Resolve query with same resolver ...
+            -&gt;resolveWith(BuildingResolver::class)
+            //... but return an array of Building type
+            -&gt;setReturnType(JsonSchema::array(
+                JsonSchema::typeRef(Type::BUILDING)
+            ));
+    }
+}
+
+</code></pre>
+<p>The refactored <code>BuildingResolver</code> looks like this:</p>
+<pre><code class="language-php">&lt;?php
+declare(strict_types=1);
+
+namespace MyService\Domain\Resolver;
+
+use EventEngine\DocumentStore\DocumentStore;
+use EventEngine\DocumentStore\Filter\AnyFilter;
+use EventEngine\DocumentStore\Filter\LikeFilter;
+use EventEngine\Messaging\Message;
+use EventEngine\Querying\Resolver;
+use MyService\Domain\Api\Query;
+
+final class BuildingResolver implements Resolver
+{
+    /**
+     * @var DocumentStore
+     */
+    private $documentStore;
+
+    public function __construct(DocumentStore $documentStore)
+    {
+        $this-&gt;documentStore = $documentStore;
+    }
+
+    /**
+     * @param Message $query
+     * @return array
+     */
+    public function resolve(Message $query): array
+    {
+        switch ($query-&gt;messageName()) {
+            case Query::BUILDING:
+                return $this-&gt;resolveBuilding($query-&gt;get('buildingId'));
+            case Query::BUILDINGS:
+                return $this-&gt;resolveBuildings($query-&gt;getOrDefault('name', null));
+        }
+    }
+
+    private function resolveBuilding(string $buildingId): array
+    {
+        $buildingDoc = $this-&gt;documentStore-&gt;getDoc('buildings', $buildingId);
+
+        if(!$buildingDoc) {
+            throw new \RuntimeException("Building not found", 404);
+        }
+
+        return $buildingDoc['state'];
+    }
+
+    private function resolveBuildings(string $nameFilter = null): array
+    {
+        $filter = $nameFilter?
+            new LikeFilter('state.name', "%$nameFilter%")
+            : new AnyFilter();
+
+        $cursor = $this-&gt;documentStore-&gt;filterDocs('buildings', $filter);
+
+        $buildings = [];
+
+        foreach ($cursor as $doc) {
+            $buildings[] = $doc['state'];
+        }
+
+        return $buildings;
+    }
+}
+
+</code></pre>
+<p><code>BuildingResolver</code> can resolve both queries by mapping the query name to an internal <code>resolve*</code> method.
+For the new <code>Buildings</code> query the resolver makes use of <code>DocumentStore\Filter</code>s. The <code>LikeFilter</code> works the same way as
+a SQL like expression using <code>%</code> as a placeholder. <code>AnyFilter</code> matches any documents in the collection.
+There are many more filters available. Read more about filters in the docs (@TODO: link docs).</p>
+<p>You can test the new query using Swagger.
+This is an example query with a name filter:</p>
+<pre><code class="language-json">{
+  "name": "Acme"
+}
+</code></pre>
+<p>Add some more buildings and play with the queries. Try to exchange the <code>LikeFilter</code> with an <code>EqFilter</code> for example.
+Or see what happens if you pass an empty string as name filter.</p>
+<p class="alert alert-info">Since aggregate state is stored as a snapshot, we need to keep in mind that <strong>state</strong> is the root property. Nested keys can be
+referenced using <strong>dot notation</strong> (f.e. "state.name"). If you don't use the MultiModelStore and create your own read models,
+then you don't need that snapshot format. But remember: without the MultiModelStore you definitely need to deal
+with eventual consistency whenever reading data from a read model.</p>
+<p>In part VI we get back to the write model and learn how to work with process managers. But before we continue,
+we should clean up our code a bit. Part V describes what we can improve.</p>
+</div>        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="links">
+        <div class="container">
+            <div class="row">
+                <div class="prev col-xs-6">
+                                            <a href="https://event-engine.io/tutorial/partIII.html">Previous</a>                                    </div>
+                <div class="next col-xs-6">
+                                            <a href="https://event-engine.io/tutorial/partV.html">Next</a>                                    </div>
+            </div>
+        </div>
+    </div>
+    <div id="copyright">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <p><a href="http://prooph-software.de/about.html">Imprint</a> | Powered by <a href="https://github.com/tobiju/bookdown-bootswatch-templates" title="Visit project to generate your own docs">Bookdown Bootswatch Templates</a>.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+</div>
+<span id="forkongithub"><a href="https://github.com/proophsoftware/event-machine-docs">Fork me on GitHub</a></span><script src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
+        integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
+        crossorigin="anonymous"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/lunr.js/0.6.0/lunr.min.js"></script>
+<script src="//bartaz.github.io/sandbox.js/jquery.highlight.js"></script>
+<script src="//tobiju.github.io/share/prismjs/main.js"></script>
+<script src="//tobiju.github.io/share/prismjs/prism.js"></script>
+<script type="text/javascript">
+
+    function Search() {
+        this.store = {};
+        this.index = lunr(function () {
+            this.ref('id');
+            this.field('title', {boost: 10});
+            this.field('content');
+        });
+        this.searchResults = $('.js-search-results').addClass('list-search-results');
+    }
+
+    Search.prototype = {
+        constructor: Search,
+        init: function () {
+            this.createIndex();
+            this.bindEvents();
+        },
+        createIndex: function () {
+            var $this = this,
+                indexFilePath = $('.js-search-input').data('roothref') + 'index.json';
+
+            $.getJSON(indexFilePath, function (data) {
+                $.each(data, function (key, item) {
+                    $this.index.add({
+                        id: item.id,
+                        title: item.title,
+                        content: item.content
+                    });
+
+                    $this.store[item.id] = {
+                        href: item.id,
+                        title: item.title,
+                        content: item.content
+                    }
+                });
+            });
+        },
+        bindEvents: function () {
+            var $this = this;
+
+            $('html')
+                .on('click', function (event) {
+                    $this.close($(this), event);
+                });
+
+            $('.js-search-input, .js-search-results')
+                .on('click', function (event) {
+                    $this.click($(this), event);
+                });
+
+            $('.js-search-input')
+                .on('focus', function (event) {
+                    $this.focus($(this), event);
+                })
+                .on('keyup', function (event) {
+                    $this.search($(this), event)
+                })
+                .on('keydown', function (event) {
+                    if ($('.js-search-results ul').is(':visible')){
+                        $this.navigation($(this), event)
+                    }
+                })
+        },
+        click: function (element, event) {
+            event.stopPropagation();
+        },
+        focus: function (element, event) {
+            this.searchInputWidth = element.css('width');
+            element.animate({
+                'width': 600
+            }, 500);
+            $('#js-navbar-collapse > ul').fadeOut();
+        },
+        close: function (element, event) {
+            var $this = this;
+
+            $('.js-search-results').hide();
+            $('.js-search-input').animate({
+                'width': $this.searchInputWidth
+            }, 500);
+            $('#js-navbar-collapse > ul').fadeIn();
+        },
+        search: function (element, event) {
+            var $this = this;
+
+            if (event.keyCode == 13 || event.keyCode == 38 || event.keyCode == 40) {
+                return;
+            }
+
+            var query = element.val(),
+                results = $this.index.search(query);
+
+            if (!results.length) {
+                $this.searchResults.empty();
+                return;
+            }
+
+            var resultsList = results.reduce(function (ul, result) {
+                var item = $this.store[result.ref];
+                var title = $('<b>').text(item.title);
+
+                var cropText = $this.cropText(item.content, query);
+                if (cropText.length === 0) {
+                    cropText = $('<p>').html(item.content.substring(0, 120) + "...");
+                }
+                var content = content = $('<p>').html(cropText);
+
+                var div = $('<div>')
+                    .append(title)
+                    .append(content);
+                var a = $('<a>').attr('href', item.href)
+                    .append(div);
+                var li = $('<li>')
+                    .append(a);
+                ul.append(li);
+
+                return ul;
+            }, $('<ul>'));
+
+            this.searchResults.html(resultsList);
+
+            $('.js-search-results').show();
+            $(".js-search-results li:first-child").addClass('selected');
+        },
+        cropText: function (content, query) {
+            var cropedText = '',
+                re = new RegExp("\\s?(.{0,30})?" + query + ".*?\\b(.{0,30}.)?\\s?", "gi");
+
+            $.each(content.match(re), function (key, value) {
+                cropedText += '...' + value + '...';
+            });
+
+            return cropedText;
+        },
+        navigation: function (element, event) {
+            var selected = null,
+                listSelector = ".js-search-results ul",
+                listItemSelector = listSelector + " li",
+                selectedListItemSelector = listItemSelector + ".selected",
+                selectedListItemSelectorAnchor = listItemSelector + ".selected a";
+
+            // enter
+            if (event.keyCode == 13) {
+                event.preventDefault();
+                this.close();
+                window.location.replace($(selectedListItemSelectorAnchor).attr('href'));
+            }
+
+            // up
+            if (event.keyCode == 38) {
+                selected = $(selectedListItemSelector);
+                $(listItemSelector).removeClass("selected");
+
+                if (selected.prev().length == 0) {
+                    selected.siblings().last().addClass("selected");
+                } else {
+                    selected.prev().addClass("selected");
+                }
+
+                selected = $(selectedListItemSelector);
+                this.scrollListUp(selected);
+            }
+
+            // down
+            if (event.keyCode == 40) {
+                selected = $(selectedListItemSelector);
+                $(listItemSelector).removeClass("selected");
+
+                if (selected.next().length == 0) {
+                    selected.siblings().first().addClass("selected");
+                } else {
+                    selected.next().addClass("selected");
+                }
+
+                selected = $(selectedListItemSelector);
+                this.scrollListDown(selected);
+            }
+        },
+        scrollListDown: function (element) {
+            var ul = element.parent(),
+                ulHeight = ul.height(),
+                ulBottomPosition = ulHeight + ul.scrollTop(),
+                liBottomPosition = element.position().top + element.height();
+
+            if (liBottomPosition > ulBottomPosition) {
+                ul.scrollTop(liBottomPosition - ulHeight);
+            }
+
+            if (element.is(':first-child')) {
+                ul.scrollTop(0);
+            }
+        },
+        scrollListUp: function (element) {
+            var ul = element.parent(),
+                ulTopPosition = ul.scrollTop(),
+                liTopPosition = element.position().top;
+
+            if (liTopPosition < ulTopPosition) {
+                ul.scrollTop(element.position().top);
+            }
+
+            if (element.is(':last-child')) {
+                ul.scrollTop(element.position().top - element.height());
+            }
+        }
+    };
+
+    $(function () {
+        var search = new Search();
+        search.init();
+    });
+</script>
+<script src="https://bartaz.github.io/sandbox.js/jquery.highlight.js"></script>
+</body></html>
