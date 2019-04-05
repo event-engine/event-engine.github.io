@@ -650,7 +650,7 @@
         border-color: #EB6842;
     }
 
-    .alert-error {
+    .alert-danger {
         border-color: #CC3340;
     }
 
@@ -667,6 +667,22 @@
         color: #07BDF1;
         text-decoration: none;
     }
+
+    .alert.alert-important {
+        border-width: 0 1px 4px 1px;
+        background-color: #CC3340;
+        color: #fff;
+    }
+
+    .alert.alert-important .alert-link {
+        color: #ffffff;
+        text-decoration: underline;
+    }
+
+    .alert.alert-important .alert-link:hover, .alert .alert-link:active {
+        color: #ee374b;
+        text-decoration: underline;
+    }
 </style>
 </head>
 <body data-spy="scroll" data-target="#sideNav" data-offset="50" class="bbt-theme-flatly">
@@ -680,7 +696,7 @@
                 <input type="text"
                        placeholder="Search"
                        class="js-search-input form-control"
-                       data-roothref="https://event-engine.io/">
+                       data-roothref="/">
 
                 <div class="js-search-results"></div>
             </div>
@@ -694,7 +710,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="https://event-engine.io/">
+            <a class="navbar-brand" href="/">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" class="prooph-logo">
                     <defs>
                         <style>
@@ -728,19 +744,19 @@
     
     <ul class="nav navbar-nav">
                         <li>
-    <a href="https://event-engine.io/intro/">Introduction</a>
+    <a href="/intro/">Introduction</a>
 
     </li>
                         <li>
-    <a href="https://event-engine.io/tutorial/">Tutorial</a>
+    <a href="/tutorial/">Tutorial</a>
 
     </li>
                         <li>
-    <a href="https://event-engine.io/api/">Docs</a>
+    <a href="/api/">Docs</a>
 
     </li>
                         <li>
-    <a href="https://event-engine.io/news/">News</a>
+    <a href="/news/">News</a>
 
     </li>
             </ul>
@@ -790,7 +806,7 @@ All packages are listed on <a href="https://github.com/event-engine">GitHub</a> 
 the usage of the new <strong>MultiModelStore</strong> feature, which replaces aggregate projections in the default skeleton set up. That said, even if you did the Event Machine tutorial before
 and think you know the basics, I highly recommend to do the new Event Engine tutorial again to quickly learn more about new features and structural changes.</p>
 <h2 id="4-1-3">API Docs</h2>
-<p>At the time of writing many API docs are still outdated. You'll find a warning at the top of each page that still needs to be migrated.</p>
+<p>At the time of writing, many API docs are still outdated. You'll find a warning at the top of each page that still needs to be migrated.</p>
 <h2 id="4-1-4">Immutable Objects</h2>
 <p>We've added new documentation about how to quickly generate immutable objects using PHPStorm templates and the <code>event-engine/php-data</code> package.
 <a href="https://event-engine.io/api/immutable_state.html">Learn more</a></p>
@@ -805,7 +821,7 @@ and think you know the basics, I highly recommend to do the new Event Engine tut
         <div class="container">
             <div class="row">
                 <div class="prev col-xs-6">
-                                            <a href="https://event-engine.io/news/">Previous</a>                                    </div>
+                                            <a href="/news/">Previous</a>                                    </div>
                 <div class="next col-xs-6">
                                     </div>
             </div>

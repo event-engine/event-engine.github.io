@@ -650,7 +650,7 @@
         border-color: #EB6842;
     }
 
-    .alert-error {
+    .alert-danger {
         border-color: #CC3340;
     }
 
@@ -667,6 +667,22 @@
         color: #07BDF1;
         text-decoration: none;
     }
+
+    .alert.alert-important {
+        border-width: 0 1px 4px 1px;
+        background-color: #CC3340;
+        color: #fff;
+    }
+
+    .alert.alert-important .alert-link {
+        color: #ffffff;
+        text-decoration: underline;
+    }
+
+    .alert.alert-important .alert-link:hover, .alert .alert-link:active {
+        color: #ee374b;
+        text-decoration: underline;
+    }
 </style>
 </head>
 <body data-spy="scroll" data-target="#sideNav" data-offset="50" class="bbt-theme-flatly">
@@ -680,7 +696,7 @@
                 <input type="text"
                        placeholder="Search"
                        class="js-search-input form-control"
-                       data-roothref="https://event-engine.io/">
+                       data-roothref="/">
 
                 <div class="js-search-results"></div>
             </div>
@@ -694,7 +710,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="https://event-engine.io/">
+            <a class="navbar-brand" href="/">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" class="prooph-logo">
                     <defs>
                         <style>
@@ -728,19 +744,19 @@
     
     <ul class="nav navbar-nav">
                         <li>
-    <a href="https://event-engine.io/intro/">Introduction</a>
+    <a href="/intro/">Introduction</a>
 
     </li>
                         <li>
-    <a href="https://event-engine.io/tutorial/">Tutorial</a>
+    <a href="/tutorial/">Tutorial</a>
 
     </li>
                         <li>
-    <a href="https://event-engine.io/api/">Docs</a>
+    <a href="/api/">Docs</a>
 
     </li>
                         <li>
-    <a href="https://event-engine.io/news/">News</a>
+    <a href="/news/">News</a>
 
     </li>
             </ul>
@@ -773,9 +789,9 @@
         <div class="container">
             <div class="row">
                 <div class="prev col-xs-6">
-                                            <a href="https://event-engine.io/api/projections/">Previous</a>                                    </div>
+                                            <a href="/api/projections/">Previous</a>                                    </div>
                 <div class="next col-xs-6">
-                                            <a href="https://event-engine.io/news/">Next</a>                                    </div>
+                                            <a href="/news/">Next</a>                                    </div>
             </div>
         </div>
     </div>
