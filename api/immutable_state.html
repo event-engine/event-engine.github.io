@@ -696,7 +696,7 @@
                 <input type="text"
                        placeholder="Search"
                        class="js-search-input form-control"
-                       data-roothref="/">
+                       data-roothref="https://event-engine.io/">
 
                 <div class="js-search-results"></div>
             </div>
@@ -710,7 +710,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/">
+            <a class="navbar-brand" href="https://event-engine.io/">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" class="prooph-logo">
                     <defs>
                         <style>
@@ -744,19 +744,19 @@
     
     <ul class="nav navbar-nav">
                         <li>
-    <a href="/intro/">Introduction</a>
+    <a href="https://event-engine.io/intro/">Introduction</a>
 
     </li>
                         <li>
-    <a href="/tutorial/">Tutorial</a>
+    <a href="https://event-engine.io/tutorial/">Tutorial</a>
 
     </li>
                         <li>
-    <a href="/api/">Docs</a>
+    <a href="https://event-engine.io/api/">Docs</a>
 
     </li>
                         <li>
-    <a href="/news/">News</a>
+    <a href="https://event-engine.io/news/">News</a>
 
     </li>
             </ul>
@@ -829,22 +829,22 @@ Please find the <code>settings.zip</code> <a href="https://github.com/event-engi
 <div class="tab-content">
     <div id="vo_string" class="tab-pane fade in active">
         <div class="well">
-            <img src="/api/img/vo_string.gif" alt="Value Object Template vo_string" title="Value Object Template vo_string">
+            <img src="https://event-engine.io/api/img/vo_string.gif" alt="Value Object Template vo_string" title="Value Object Template vo_string">
         </div>
     </div>
     <div id="vo_int" class="tab-pane fade in">
         <div class="well">
-            <img src="/api/img/vo_int.gif" alt="Value Object Template vo_int" title="Value Object Template vo_int">
+            <img src="https://event-engine.io/api/img/vo_int.gif" alt="Value Object Template vo_int" title="Value Object Template vo_int">
         </div>
     </div>
     <div id="vo_float" class="tab-pane fade in">
         <div class="well">
-            <img src="/api/img/vo_float.gif" alt="Value Object Template vo_float" title="Value Object Template vo_float">
+            <img src="https://event-engine.io/api/img/vo_float.gif" alt="Value Object Template vo_float" title="Value Object Template vo_float">
         </div>
     </div>
     <div id="vo_bool" class="tab-pane fade in">
         <div class="well">
-            <img src="/api/img/vo_bool.gif" alt="Value Object Template vo_bool" title="Value Object Template vo_bool">
+            <img src="https://event-engine.io/api/img/vo_bool.gif" alt="Value Object Template vo_bool" title="Value Object Template vo_bool">
         </div>
     </div>
 </div>
@@ -852,12 +852,12 @@ Please find the <code>settings.zip</code> <a href="https://github.com/event-engi
 <h3 id="3-4-3-1">vo_uuid</h3>
 <p>A UUID value object template is included, too. It works with the well known <a href="https://github.com/ramsey/uuid">ramsey/uuid</a> library.
 Along with the <code>vo_uuid</code> template you also get a <code>use_uuid</code> template. Use them in combination like shown in the example:</p>
-<p><img src="/api/img/vo_uuid.gif" alt="Value Object Template vo_uuid"></p>
+<p><img src="https://event-engine.io/api/img/vo_uuid.gif" alt="Value Object Template vo_uuid"></p>
 <h3 id="3-4-3-2">vo_datetime</h3>
 <p>The <code>vo_datetime</code> is another specialized scalar value object template. It uses PHP's built-in <code>\DateTimeImmutable</code>, ensures
 <code>UTC</code> is used as well as a standard format for from/to string conversion.</p>
 <p>The <code>FORMAT</code> constant can be used to change the format. By default it is <code>'Y-m-d\TH:i:s.u</code>, which is the same format as of the <code>Message::createdAt</code> property.</p>
-<p><img src="/api/img/vo_datetime.gif" alt="Value Object Template vo_datetime"></p>
+<p><img src="https://event-engine.io/api/img/vo_datetime.gif" alt="Value Object Template vo_datetime"></p>
 <h2 id="3-4-4">List / Collection</h2>
 <p>If you need a list or collection with all items being of the same type you can use the <code>vo_collection</code> template. It generates quite a lot of code so that you can work with the list
 out-of-box. Feel free to add more methods, either to the template or after code generation if it is specific to the concrete class.</p>
@@ -868,7 +868,7 @@ Of course all immutable objects generated with our VO templates can be used as i
 <li>The raw type of the items, one of: <code>string, int, float, bool, array</code>
 </li>
 </ol>
-<p><img src="/api/img/vo_collection.gif" alt="Value Object Template vo_collection"></p>
+<p><img src="https://event-engine.io/api/img/vo_collection.gif" alt="Value Object Template vo_collection"></p>
 <p class="alert alert-warning">If you use the <code>push()</code> and <code>pop()</code> methods, keep in mind that the list is immutable. That said, only the returned list contains the change (item appended, last item removed).
 This also means, that you have to use <code>last()</code> before <code>pop()</code> to get the last item of the list.</p>
 <h2 id="3-4-5">Complex Types</h2>
@@ -884,7 +884,7 @@ is removed in the file template. The example shows both in action.</p>
 <li>Generate getter methods for the properties with appropriate return types. The getter methods should be named like the properties.</li>
 </ol>
 <p class="alert alert-info"><strong>ImmutableRecordLogic</strong> relies on the return types of getter methods to know which property type class should be used when creating a record instance from raw data.</p>
-<p><img src="/api/img/immutable_record.gif" alt="Immutable Record"></p>
+<p><img src="https://event-engine.io/api/img/immutable_record.gif" alt="Immutable Record"></p>
 <h3 id="3-4-5-1">fromArray vs. fromRecordData</h3>
 <p>By default <code>ImmutableRecordLogic</code> provides two ways to instantiate an object:</p>
 <ul>
@@ -970,7 +970,7 @@ Property data validation is delegated to the property type classes. You don't ha
 However, in some cases you might want to use a plain php array instead of an extra class to keep a list of items in a record property. In that case you have to add a <code>private static arrayPropItemTypeMap(): array</code> method,
 that returns a mapping of <strong>property name to type class</strong>. PHP does not provide a way to specify array item types in return types (yet). Hence, <code>ImmutableRecordLogic</code> needs a hint.</p>
 <p>Let's look at an example. We a add a <code>friends</code> property to our <code>Person</code> record, define array as property/return type and provide a mapping that friends are also of type <code>Person</code>.</p>
-<p><img src="/api/img/immutable_record_array_prop.gif" alt="Immutable Record with array prop"></p>
+<p><img src="https://event-engine.io/api/img/immutable_record_array_prop.gif" alt="Immutable Record with array prop"></p>
 <h3 id="3-4-5-4">Initialize Properties</h3>
 <p>If we replace the plain array type of the previous example with the <code>FriendsList</code> generated earlier, our <code>Person</code> class would look like this:</p>
 <pre><code class="language-php">&lt;?php
@@ -1105,9 +1105,9 @@ Always use the <code>init()</code> hook for setting default values.</p>
         <div class="container">
             <div class="row">
                 <div class="prev col-xs-6">
-                                            <a href="/api/functional_flavour.html">Previous</a>                                    </div>
+                                            <a href="https://event-engine.io/api/functional_flavour.html">Previous</a>                                    </div>
                 <div class="next col-xs-6">
-                                            <a href="/api/document_store/">Next</a>                                    </div>
+                                            <a href="https://event-engine.io/api/document_store/">Next</a>                                    </div>
             </div>
         </div>
     </div>
