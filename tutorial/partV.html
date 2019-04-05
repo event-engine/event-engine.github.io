@@ -1250,11 +1250,10 @@ declare(strict_types=1);
 
 namespace MyService\Domain\Api;
 
-use App\Infrastructure\Finder\BuildingFinder;
-use App\Infrastructure\System\HealthCheckResolver;
 use EventEngine\EventEngine;
 use EventEngine\EventEngineDescription;
 use EventEngine\JsonSchema\JsonSchema;
+use MyService\Domain\Resolver\BuildingResolver;
 
 class Query implements EventEngineDescription
 {
@@ -1266,7 +1265,7 @@ class Query implements EventEngineDescription
         $eventEngine-&gt;registerQuery(self::BUILDING, JsonSchema::object([
             Payload::BUILDING_ID =&gt; Schema::buildingId(),
         ]))
-            -&gt;resolveWith(BuildingFinder::class)
+            -&gt;resolveWith(BuildingResolver::class)
             -&gt;setReturnType(Schema::building());
 
         $eventEngine-&gt;registerQuery(
@@ -1276,7 +1275,7 @@ class Query implements EventEngineDescription
                 [Payload::NAME =&gt; JsonSchema::nullOr(Schema::buildingNameFilter())]
             )
         )
-            -&gt;resolveWith(BuildingFinder::class)
+            -&gt;resolveWith(BuildingResolver::class)
             -&gt;setReturnType(Schema::buildingList());
     }
 }
@@ -1309,7 +1308,7 @@ class Query implements EventEngineDescription
     </div>
 </footer>
 </div>
-<span id="forkongithub"><a href="https://github.com/proophsoftware/event-machine-docs">Fork me on GitHub</a></span><script src="//code.jquery.com/jquery-2.2.0.min.js"></script>
+<span id="forkongithub"><a href="https://github.com/event-engine/docs">Fork me on GitHub</a></span><script src="//code.jquery.com/jquery-2.2.0.min.js"></script>
 <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"
         integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS"
         crossorigin="anonymous"></script>
