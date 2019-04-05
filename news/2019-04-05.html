@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
 <meta name="HandheldFriendly" content="True"/>
-<title>Part VII - The Unhappy Path</title>
+<title>Event Engine Tutorial Available</title>
 <link rel="shortcut icon" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/prooph-logo@0.5x.png">
 <link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/apple-touch-icon-144-precomposed.png">
 <link rel="apple-touch-icon-precomposed" sizes="114x114" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/apple-touch-icon-114-precomposed.png">
@@ -756,253 +756,46 @@
             <nav class="nav-left hidden-xs hidden-sm" id="sideNav">
     <ul class="nav nav-stacked" data-spy="affix" data-offset-top="59" role="tablist">
                                 <li>
-                <a href="#2-8" title="Part&#x20;VII&#x20;-&#x20;The&#x20;Unhappy&#x20;Path">Part VII - The Unhappy P...</a>
+                <a href="#4-1" title="Event&#x20;Engine&#x20;Tutorial&#x20;Available">Event Engine Tutorial Av...</a>
             </li>
                                 <li>
-                <a href="#2-8-1" title="Process&#x20;Manager">Process Manager</a>
+                <a href="#4-1-1" title="Repo&#x20;Split">Repo Split</a>
             </li>
                                 <li>
-                <a href="#2-8-2" title="The&#x20;End">The End</a>
+                <a href="#4-1-2" title="Rewritten&#x20;Tutorial">Rewritten Tutorial</a>
+            </li>
+                                <li>
+                <a href="#4-1-3" title="API&#x20;Docs">API Docs</a>
+            </li>
+                                <li>
+                <a href="#4-1-4" title="Immutable&#x20;Objects">Immutable Objects</a>
+            </li>
+                                <li>
+                <a href="#4-1-5" title="Keep&#x20;Up-To-Date">Keep Up-To-Date</a>
             </li>
             </ul>
 </nav>
         </div>
                 <div class="col-md-9">
-<div id="section-main"><h1 id="2-8">Part VII - The Unhappy Path</h1>
-<p>Developers tend to work out the happy path of a feature only and throw exceptions in every unknown situation.
-This behaviour is often caused by bad project management. Developers get domain knowledge from Jira tickets written by a product owner
-(Jira is used here as a synonym for any ticket system used in an agile process)
-instead of talking to domain experts face-to-face. Most tickets don't include unhappy paths until they happen and find
-their way back to the developer as a bug ticket.</p>
-<p>Is this really the best way to deal with unexpected scenarios? Wouldn't it be better to prepare for
-the unhappy paths as well? Sure, it takes more time upfront but saves a lot of time later when the application runs
-in production and can deal with failure scenarios in a sane way.</p>
-<p>Our <code>Building</code> aggregate does a bad job with regards to failure handling. Imagine a user is already in a building and tries
-to check in again. What does that mean in the real world? First of all it is not possible to be in and out of a building
-at the same time. So either a hacker has stolen the identity or system state is broken for whatever reason.
-Deciding if entrance to the building is blocked or not should be made by the business. And regardless of
-the decision it is always interesting to have an event in the event stream about the double check in. This makes monitoring
-much simpler than scanning error logs.</p>
-<p>We've talked to the domain experts and they want us to notify security in case of a <code>DoubleCheckIn</code>. With Event Engine
-this is as simple as throwing an exception ;)</p>
-<p>We need an event to record a <code>DoubleCheckIn</code>:</p>
-<pre><code class="language-php">&lt;?php
-
-declare(strict_types=1);
-
-namespace MyService\Domain\Api;
-
-use EventEngine\EventEngine;
-use EventEngine\EventEngineDescription;
-use EventEngine\JsonSchema\JsonSchema;
-
-class Event implements EventEngineDescription
-{
-    const BUILDING_ADDED = 'BuildingAdded';
-    const USER_CHECKED_IN = 'UserCheckedIn';
-    const DOUBLE_CHECK_IN_DETECTED = 'DoubleCheckInDetected';
-
-    /**
-     * @param EventEngine $eventEngine
-     */
-    public static function describe(EventEngine $eventEngine): void
-    {
-        /* ... */
-
-        $eventEngine-&gt;registerEvent(
-            self::DOUBLE_CHECK_IN_DETECTED,
-            JsonSchema::object([
-                Payload::BUILDING_ID =&gt; Schema::buildingId(),
-                Payload::NAME =&gt; Schema::username(),
-            ])
-        );
-    }
-}
-
-</code></pre>
-<p>Now that we have the event we can replace the exception and yield a <code>DoubleCheckInDetected</code> event instead:</p>
-<pre><code class="language-php">&lt;?php
-
-declare(strict_types=1);
-
-namespace MyService\Domain\Model;
-
-use MyService\Domain\Api\Event;
-use MyService\Domain\Api\Payload;
-use EventEngine\Messaging\Message;
-
-final class Building
-{
-    public static function add(Message $addBuilding): \Generator
-    {
-        yield [Event::BUILDING_ADDED, $addBuilding-&gt;payload()];
-    }
-
-    public static function whenBuildingAdded(Message $buildingAdded): Building\State
-    {
-        return Building\State::fromArray($buildingAdded-&gt;payload());
-    }
-
-    public static function checkInUser(Building\State $state, Message $checkInUser): \Generator
-    {
-        if($state-&gt;isUserCheckedIn($checkInUser-&gt;get(Payload::NAME))) {
-            yield [Event::DOUBLE_CHECK_IN_DETECTED, $checkInUser-&gt;payload()];
-            return; //&lt;-- Note: we need to return, otherwise UserCheckedIn would be yielded, too
-        }
-
-        yield [Event::USER_CHECKED_IN, $checkInUser-&gt;payload()];
-    }
-
-    public static function whenUserCheckedIn(Building\State $state, Message $userCheckedIn): Building\State
-    {
-        return $state-&gt;withCheckedInUser($userCheckedIn-&gt;get(Payload::NAME));
-    }
-
-    public static function whenDoubleCheckInDetected(Building\State $state, Message $event): Building\State
-    {
-        //No state change required, simply return current state
-        return $state;
-    }
-}
-
-</code></pre>
-<p>We need to tell Event Engine that <code>Building::checkInUser()</code> yields <code>DoubleCheckInDetected</code> in some situations:</p>
-<pre><code class="language-php">&lt;?php
-
-declare(strict_types=1);
-
-namespace MyService\Domain\Api;
-
-use MyService\Domain\Model\Building;
-use EventEngine\EventEngine;
-use EventEngine\EventEngineDescription;
-
-class Aggregate implements EventEngineDescription
-{
-    const BUILDING = 'Building';
-
-
-    /**
-     * @param EventEngine $eventEngine
-     */
-    public static function describe(EventEngine $eventEngine): void
-    {
-        /* ... */
-
-        $eventEngine-&gt;process(Command::CHECK_IN_USER)
-            -&gt;withExisting(self::BUILDING)
-            -&gt;handle([Building::class, 'checkInUser'])
-            -&gt;recordThat(Event::USER_CHECKED_IN)
-            -&gt;apply([Building::class, 'whenUserCheckedIn'])
-            -&gt;orRecordThat(Event::DOUBLE_CHECK_IN_DETECTED)
-            -&gt;apply([Building::class, 'whenDoubleCheckInDetected']);
-    }
-}
-
-</code></pre>
-<p>Try to check <em>John</em> in again:</p>
-<pre><code class="language-json">{
-  "buildingId": "9ee8d8a8-3bd3-4425-acee-f6f08b8633bb",
-  "name": "John"
-}
-</code></pre>
-<p>Instead of an error we get a 202 command accepted response.</p>
-<p>But when we look at the event stream (table <code>_4228e4a00331b5d5e751db0481828e22a2c3c8ef</code>) we see a <code>DoubleCheckInDetected</code> event.</p>
-<table>
-<thead>
-<tr>
-<th>no</th>
-<th>event_id</th>
-<th>event_name</th>
-<th>payload</th>
-<th>metadata</th>
-<th>created_at</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>bce42506-...</td>
-<td>BuildingAdded</td>
-<td>{"buildingId":"9ee8d8a8-...","name":"Acme Headquarters"}</td>
-<td>{"_aggregate_id": "9ee8d8a8-...", "_causation_id": "e482f5b8-...", "_aggregate_type": "Building", "_causation_name": "AddBuilding", "_aggregate_version": 1}</td>
-<td>2018-02-14 22:09:32.039848</td>
-</tr>
-<tr>
-<td>2</td>
-<td>0ee8d2fb-...</td>
-<td>UserCheckedIn</td>
-<td>{"buildingId":"9ee8d8a8-...","name":"John"}</td>
-<td>{"_aggregate_id": "9ee8d8a8-...", "_causation_id": "1ce0e46d-...", "_aggregate_type": "Building", "_causation_name": "CheckInUser", "_aggregate_version": 2}</td>
-<td>2018-02-16 21:37:55.131122</td>
-</tr>
-<tr>
-<td>3</td>
-<td>4f6a8429-...</td>
-<td>DoubleCheckInDetected</td>
-<td>{"buildingId":"9ee8d8a8-...","name":"John"}</td>
-<td>{"_aggregate_id": "9ee8d8a8-...", "_causation_id": "c347dd85-...", "_aggregate_type": "Building", "_causation_name": "CheckInUser", "_aggregate_version": 3}</td>
-<td>2018-02-16 23:03:59.739666</td>
-</tr>
-</tbody>
-</table>
-<h2 id="2-8-1">Process Manager</h2>
-<p>To complete the user story we have to notify security. The security team uses a dedicated monitoring application that
-can receive arbitrary notification messages. To communicate with that external system we can use a so-called <strong>process manager</strong> or
-<strong>policy</strong>. Maybe you're more familiar with the term event listener but be careful to not mix it with event listeners known
-from web frameworks like Symfony or Zend. Listeners in Event Engine <strong>react</strong> to domain events and trigger follow up
-commands for actions, like sending emails or interacting with external systems.</p>
-<p>We can simulate the security monitoring system with a small JS app shipped with the php-engine-skeleton.
-Open <code>http://localhost:8080/ws.html</code> in your browser.</p>
-<p><em>Note: If the app shows a connection error then try to log into the rabbit mgmt console first: <code>https://localhost:8081</code>. Accept the self-signed certificate
-and login with usr: <code>prooph</code> pwd: <code>prooph</code>. If you're logged in switch back to <code>http://localhost:8080/ws.html</code> and reload the page.</em></p>
-<p>If the app says <code>Status: Connected to websocket: ui-queue</code> it is ready to receive messages from Event Engine.</p>
-<p>In <code>src/System/SystemServices</code> you can find a factory method for a <code>MyService\System\UiExchange</code>.
-It's a default domain event listener shipped with the skeleton that can be used to push events on a <em>RabbitMQ ui-exchange</em>.
-The exchange is preconfigured (you can see that in the rabbit mgmt UI) and the JS app connects to a corresponding <em>ui-queue</em>.</p>
-<p>In <code>src/Domain/Api/Listener</code> we can put the pieces together:</p>
-<pre><code class="language-php">&lt;?php
-
-declare(strict_types=1);
-
-namespace MyService\Domain\Api;
-
-use EventEngine\EventEngine;
-use EventEngine\EventEngineDescription;
-use MyService\System\UiExchange;
-
-class Listener implements EventEngineDescription
-{
-
-    public static function describe(EventEngine $eventEngine): void
-    {
-        $eventEngine-&gt;on(Event::DOUBLE_CHECK_IN_DETECTED, UiExchange::class);
-    }
-}
-
-</code></pre>
-<p>Whenever a <code>DoubleCheckInDetected</code> event is recorded and written to the stream Event Engine invokes the <code>UiExchange</code>
-listener that takes the event and pushes it to <em>rabbit</em>.</p>
-<p>Try to check <em>John</em> in again, while keeping an eye on the monitoring app <code>http://localhost:8080/ws.html</code>.</p>
-<pre><code class="language-json">{
-  "buildingId": "9ee8d8a8-3bd3-4425-acee-f6f08b8633bb",
-  "name": "John"
-}
-</code></pre>
-<p><img src="https://event-engine.io/tutorial/img/monitoring.png" alt="Monitoring UI">]</p>
-<h2 id="2-8-2">The End</h2>
-<p>Congratulations! You've mastered the Event Engine tutorial. There are two bonus parts available to learn more
-about <strong>custom projections</strong> and <strong>testing with Event Engine</strong>.
-And another two bonus parts introduce <strong>Event Engine Flavours</strong>. Choose your own Flavour and maximize personal
-developer experience with Event Engine.</p>
-<p>The Event Engine API docs contain a lot more details. Last but not least, a reminder that the prooph software team
-offers commercial project support and workshops for Event Engine and the prooph components.</p>
-<p>Our workshops include Event Storming sessions and guidance on how to turn the results into working prototypes using Event Engine.
-We can also show and discuss framework integrations. Event Engine can easily be integrated with <em>Symfony</em>, <em>Laravel</em> and
-other PHP web frameworks. The skeleton is based on <em>Zend Strategility</em> so you can handle http related tasks, like authentication,
-using <em>PSR-15</em> middleware. But again, other web frameworks play nicely with Event Engine!</p>
-<p><a href="http://prooph.de"><img src="https://github.com/codeliner/php-ddd-cargo-sample/raw/master/docs/assets/prooph-software-logo.png" alt="prooph software"></a></p>
-<p>If you are interested please <a href="http://getprooph.org/#get-in-touch">get in touch</a>!</p>
+<div id="section-main"><h1 id="4-1">Event Engine Tutorial Available</h1>
+<p class="alert alert-light"><em>Written by Alexander Miertsch (<a href="https://github.com/codeliner">@codeliner</a>) - CEO prooph software GmbH - prooph core team - 2019-04-05</em></p>
+<p>Three weeks ago we've released the <a href="https://github.com/event-engine/php-engine/releases/tag/v0.1.0">first dev version of Event Engine</a>, which supersedes Event Machine.
+Now we reached another important milestone towards a stable release. Make sure to check out the brand new Event Engine tutorial: <a href="https://event-engine.io/tutorial/">https://event-engine.io/tutorial/</a>
+along with a new <a href="https://github.com/event-engine/php-engine-skeleton">skeleton application</a>.</p>
+<h2 id="4-1-1">Repo Split</h2>
+<p>A prerequisite for the new skeleton was the repo split announced in the release notes of v0.1.
+All packages are listed on <a href="https://github.com/event-engine">GitHub</a> and <a href="https://packagist.org/packages/event-engine/">Packagist</a>.</p>
+<h2 id="4-1-2">Rewritten Tutorial</h2>
+<p>The Event Engine tutorial is a rewrite of the previous Event Machine tutorial. The story is the same but it differs in many details like a changed skeleton structure and
+the usage of the new <strong>MultiModelStore</strong> feature, which replaces aggregate projections in the default skeleton set up. That said, even if you did the Event Machine tutorial before
+and think you know the basics, I highly recommend to do the new Event Engine tutorial again to quickly learn more about new features and structural changes.</p>
+<h2 id="4-1-3">API Docs</h2>
+<p>At the time of writing many API docs are still outdated. You'll find a warning at the top of each page that still needs to be migrated.</p>
+<h2 id="4-1-4">Immutable Objects</h2>
+<p>We've added new documentation about how to quickly generate immutable objects using PHPStorm templates and the <code>event-engine/php-data</code> package.
+<a href="https://event-engine.io/api/immutable_state.html">Learn more</a></p>
+<h2 id="4-1-5">Keep Up-To-Date</h2>
+<p>Follow us on <a href="https://twitter.com/prooph_software">twitter</a> and watch changes/releases on the <a href="https://github.com/event-engine">event-engine repos</a></p>
 </div>        </div>
     </div>
 </div>
@@ -1012,9 +805,9 @@ using <em>PSR-15</em> middleware. But again, other web frameworks play nicely wi
         <div class="container">
             <div class="row">
                 <div class="prev col-xs-6">
-                                            <a href="https://event-engine.io/tutorial/partVI.html">Previous</a>                                    </div>
+                                            <a href="https://event-engine.io/news/">Previous</a>                                    </div>
                 <div class="next col-xs-6">
-                                            <a href="https://event-engine.io/tutorial/bonusI.html">Next</a>                                    </div>
+                                    </div>
             </div>
         </div>
     </div>
