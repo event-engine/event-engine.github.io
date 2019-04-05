@@ -747,7 +747,7 @@
     
     <ul class="nav navbar-nav">
                         <li>
-    <a href="https://event-engine.io/intro/">Introduction</a>
+    <a href="https://event-engine.io/intro.html">About Event Engine</a>
 
     </li>
                         <li>
@@ -1055,7 +1055,7 @@ class Aggregate implements EventEngineDescription
 }
 </code></pre>
 <p>This time the command goes through. If everything is fine the message box returns a <code>202 command accepted</code> response.</p>
-<p class="alert alert-info">Event Engine emphasizes a CQRS and Event Sourcing architecture. For commands this means that no data is returned.
+<p class="alert alert-success">Event Engine emphasizes a CQRS and Event Sourcing architecture. For commands this means that no data is returned.
 The write model has received and processed the command <strong>AddBuilding</strong> successfully but we don't know what the new
 application state looks like. We will use a query, which is the third message type, to get this data.
 Head over to tutorial part IV to learn more about queries and application state management using the <strong>MultiModelStore</strong>.</p>
