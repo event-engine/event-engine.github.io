@@ -811,7 +811,7 @@ into production grade code.</p>
 <pre><code class="language-bash">composer require event-engine/discolight
 </code></pre>
 <h2 id="3-7-2">Service Factory</h2>
-<p>A practical example explains intended usage best. If you walked your way through the tutorial, you already know about Discolight. The <a href="https://github.com/event-engine/php-engine-skeleton">skeleton app</a>
+<p>If you walked your way through the tutorial, you already know about Discolight. The <a href="https://github.com/event-engine/php-engine-skeleton">skeleton app</a>
 comes preconfigured with it.</p>
 <p>You're asked to provide a <code>ServiceFactory</code>, that contains a public factory method for each dependency.
 Such a <a href="https://github.com/event-engine/php-engine-skeleton/blob/master/src/ServiceFactory.php">class</a> is included in the skeleton.</p>
@@ -843,7 +843,7 @@ This means that you can do the following to get the multi model store from Disco
 <p>In most cases we want to get the same instance of a service from the container no matter how often we request it. This is called a <code>Singleton</code>.
 Discolight is dead simple. It does not know anything about singletons. Instead we use a pattern called <a href="https://en.wikipedia.org/wiki/Memoization">memoization</a>
 to cache the instance of a service in memory and return it from cache on subsequent calls.</p>
-<p>The <code>ServiceFactory</code> is a complete userland implementation. No interface needs to be implemented. To add memoization to your service factory you can use the provided
+<p>The <code>ServiceFactory</code> is userland implementation. No interface implementation required. To add memoization to your service factory use the provided
 trait <code>EventEngine\Discolight\ServiceRegistry</code> like it is done in the skeleton service factory.</p>
 <pre><code class="language-php">final class ServiceFactory
 {

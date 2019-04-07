@@ -809,7 +809,7 @@ The latter method is used when initializing Event Engine from a cached config. <
 further information.</p>
 <p>@TODO Link to schema docs</p>
 <p class="alert alert-info"><a class="alert-link" href="#">event-engine/php-json-schema</a> (@TODO add link) provides a JSON Schema implementation of <code>EventEngine\Schema\Schema</code>.</p>
-<p class="alert alert-light">A Schema implementation is the only dependency required in the constructor. Event Engine needs the schema to validate message schema defined in the <strong>description phase</strong>.
+<p class="alert alert-light">A Schema implementation is the only dependency required in the constructor. Event Engine needs it to validate message schema defined in the <strong>description phase</strong>.
 All other dependencies are first required when initializing Event Engine. <code>EventEngine::fromCachedConfig()</code> skips <strong>description phase</strong> and <strong>initialize phase</strong>, therefor
 it requires all dependencies along with the cached config.</p>
 <h2 id="3-1-2-2">Flavour</h2>
@@ -818,7 +818,7 @@ it requires all dependencies along with the cached config.</p>
 Learn more about <a href="#">Flavours</a> (@TODO add link).</p>
 <h2 id="3-1-2-3">Event Store</h2>
 <p class="alert alert-warning"><strong>Mandatory Dependency</strong></p>
-<p>Event Engine inspects the event store dependency. If you provide an <code>EventEngine\EventStore\EventStore</code> only, the <strong>MultiModeStore</strong> mode gets disabled.
+<p>Event Engine inspects the event store dependency. If you provide a plain <code>EventEngine\EventStore\EventStore</code>, the <strong>MultiModeStore</strong> mode gets disabled.
 If you pass a <code>EventEngine\Persistence\MultiModelStore</code> instead, Event Engine makes use of it automatically.</p>
 <p class="alert alert-light">You can pass a <code>MultiModelStore</code> as <code>EventStore</code> because the MultiModelStore is a composition of the event store and document store.</p>
 <ul>
