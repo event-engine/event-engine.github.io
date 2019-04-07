@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
 <meta name="HandheldFriendly" content="True"/>
-<title>Part IV - Projections and Queries</title>
+<title>Discolight</title>
 <link rel="shortcut icon" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/prooph-logo@0.5x.png">
 <link rel="apple-touch-icon-precomposed" sizes="144x144" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/apple-touch-icon-144-precomposed.png">
 <link rel="apple-touch-icon-precomposed" sizes="114x114" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/apple-touch-icon-114-precomposed.png">
@@ -772,473 +772,195 @@
             <nav class="nav-left hidden-xs hidden-sm" id="sideNav">
     <ul class="nav nav-stacked" data-spy="affix" data-offset-top="59" role="tablist">
                                 <li>
-                <a href="#2-5" title="Part&#x20;IV&#x20;-&#x20;Projections&#x20;and&#x20;Queries">Part IV - Projections an...</a>
+                <a href="#3-7" title="Discolight">Discolight</a>
             </li>
                                 <li>
-                <a href="#2-5-1" title="Permanent&#x20;Snapshots">Permanent Snapshots</a>
+                <a href="#3-7-1" title="Installation">Installation</a>
             </li>
                                 <li>
-                <a href="#2-5-2" title="Query,&#x20;Resolver&#x20;and&#x20;Return&#x20;Type">Query, Resolver and Retu...</a>
+                <a href="#3-7-2" title="Service&#x20;Factory">Service Factory</a>
             </li>
                                 <li>
-                <a href="#2-5-3" title="Discolight&#x20;PSR-11&#x20;Container">Discolight PSR-11 Contai...</a>
+                <a href="#3-7-3" title="Service&#x20;Ids">Service Ids</a>
             </li>
                                 <li>
-                <a href="#2-5-4" title="Optional&#x20;Query&#x20;Arguments">Optional Query Arguments</a>
+                <a href="#3-7-4" title="Singleton&#x20;Service">Singleton Service</a>
+            </li>
+                                <li>
+                <a href="#3-7-5" title="Injecting&#x20;Dependencies">Injecting Dependencies</a>
+            </li>
+                                <li>
+                <a href="#3-7-6" title="Configuration">Configuration</a>
+            </li>
+                                <li>
+                <a href="#3-7-7" title="Service&#x20;Alias">Service Alias</a>
+            </li>
+                                <li>
+                <a href="#3-7-8" title="Production&#x20;Optimization">Production Optimization</a>
             </li>
             </ul>
 </nav>
         </div>
                 <div class="col-md-9">
-<div id="section-main"><h1 id="2-5">Part IV - Projections and Queries</h1>
-<p>In part III of the tutorial we successfully implemented the first write model use case: <em>Add a new building</em>.
-Connect to the Postgres database and check the event stream table <code>_4228e4a00331b5d5e751db0481828e22a2c3c8ef</code>.
-The table should contain the first domain event yielded by the <code>Building</code> aggregate.</p>
-<table>
-<thead>
-<tr>
-<th>no</th>
-<th>event_id</th>
-<th>event_name</th>
-<th>payload</th>
-<th>metadata</th>
-<th>created_at</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>bce42506-...</td>
-<td>BuildingAdded</td>
-<td>{"buildingId":"9ee8d8a8-...","name":"Acme Headquarters"}</td>
-<td>{"_aggregate_id": "9ee8d8a8-...", "_causation_id": "e482f5b8-...", "_aggregate_type": "Building", "_causation_name": "AddBuilding", "_aggregate_version": 1}</td>
-<td>2018-02-14 22:09:32.039848</td>
-</tr>
-</tbody>
-</table>
-<p><em>If you're wondering why the event stream table has a sha1 hashed name this is because by default prooph/event-store uses that
-naming strategy to avoid database vendor specific character constraints. You can however configure a different
-naming strategy if you don't like it.</em></p>
-<p>The write model only needs an event stream to store information but the read side has a hard time querying it.
-As long as we only have a few events in the stream queries are simple and fast. But over time this table will
-grow and contain many different events. To stay flexible we need to
-separate the write side from the read side. An event sourced system normally uses <strong>projections</strong> to
-create materialized views of the application state and keep them in sync with the write model.</p>
-<p class="alert alert-warning">The problem with projections is <a class="alert-link" href="https://en.wikipedia.org/wiki/Eventual_consistency">eventual consistency</a>.
-A highly distributed system has to deal with eventual consistency. In fact, many modern systems already deal with it in one way or the other,
-for example if you use Elastic Search or Redis next to your primary database.</p>
-<p class="alert alert-success">However, Event Engine gives you fine grained control of consistency versus performance and availability. All through an easy to use
-high level API. The tutorial only covers the tip of the iceberg. But for now it's enough to know that you have many options.
-Once you've internalized the basics, you can customize the skeleton to meet your needs.</p>
-<h2 id="2-5-1">Permanent Snapshots</h2>
-<p>As already discussed in the last tutorial part, Event Engine offers an alternative to async <strong>projections</strong> namely the <code>MultiModelStore</code>.
-You can think of it like a projection or a snapshot mechanism that runs within the same transaction as the write model does.
-The result is a snapshot of the aggregate state that is always in sync with its persisted events.
-Hence, it is safe to rely on the state without worrying about eventual consistency issues.</p>
-<p>If you look at the <code>buildings</code> table of the Postgres DB, you should see one row with two columns <code>id</code> and <code>doc</code>
-with id being the buildingId and doc being the JSON representation of the <code>Building\State</code>.</p>
-<p class="alert alert-light">Event Engine allows you to start with permanent snapshots and switch to async projections later by adjusting the configuration.</p>
-<h2 id="2-5-2">Query, Resolver and Return Type</h2>
-<p>We already know that Event Engine uses JSON Schema to describe message types and define validation rules.
-For queries we can also register <strong>return types</strong> in Event Engine and those return types will appear in the <strong>Model</strong> section of the Swagger UI.</p>
-<p>Registering types is done in <code>src/Domain/Api/Type</code>.</p>
-<pre><code class="language-php">&lt;?php
-
-declare(strict_types=1);
-
-namespace MyService\Domain\Api;
-
-use EventEngine\JsonSchema\JsonSchema;
-use EventEngine\JsonSchema\Type\ObjectType;
-use MyService\Domain\Model\Building;
-use EventEngine\EventEngine;
-use EventEngine\EventEngineDescription;
-
-class Type implements EventEngineDescription
+<div id="section-main"><h1 id="3-7">Discolight</h1>
+<p>Event Engine was initially designed as a workshop framework, which is still noticeable in its design. <em>Discolight</em> is one of the nice concepts carried over from workshops
+into production grade code.</p>
+<p class="alert alert-light"><em>Credits</em>: Discolight is inspired by <a href="https://github.com/bitExpert/disco">bitExpert/disco</a> but removes the need for annotations.</p>
+<p class="alert alert-info">Discolight is a very small package. It emphasis "Hand-written service containers" similar to what Matthias Noback suggests in this <a href="https://matthiasnoback.nl/2019/03/hand-written-service-containers/">blog post</a>.</p>
+<h2 id="3-7-1">Installation</h2>
+<pre><code class="language-bash">composer require event-engine/discolight
+</code></pre>
+<h2 id="3-7-2">Service Factory</h2>
+<p>A practical example explains intended usage best. If you walked your way through the tutorial, you already know about Discolight. The <a href="https://github.com/event-engine/php-engine-skeleton">skeleton app</a>
+comes preconfigured with it.</p>
+<p>You're asked to provide a <code>ServiceFactory</code>, that contains a public factory method for each dependency.
+Such a <a href="https://github.com/event-engine/php-engine-skeleton/blob/master/src/ServiceFactory.php">class</a> is included in the skeleton.</p>
+<p class="alert alert-light"><em>Note:</em> The skeleton organizes factory methods in module specific traits (<code>src/Domain/DomainServices.php</code>, <code>src/Persistence/PersistenceServices.php</code>, ...) to keep dependencies manageable.
+But that's only a suggestion. Each service trait becomes part of the main service factory at runtime. You could also put all methods in one class or organize the traits differently.</p>
+<h2 id="3-7-3">Service Ids</h2>
+<p>The service factory does not need to implement a specific interface. Instead, Discolight scans it and treats <strong>all public methods</strong> of the class as service factory methods.
+The return type of a factory method becomes the <strong>service id</strong>.</p>
+<p>Let's look at the <a href="https://github.com/event-engine/php-engine-skeleton/blob/master/src/Persistence/PersistenceServices.php#L47">method</a> which provides the service <code>EventEngine\Persistence\MultiModelStore</code>:</p>
+<pre><code class="language-php">public function multiModelStore(): MultiModelStore
 {
-    const BUILDING = 'Building';
-
-    private static function building(): ObjectType
-    {
-        return JsonSchema::object([
-            Building\State::BUILDING_ID =&gt; JsonSchema::uuid(),
-            Building\State::NAME =&gt; JsonSchema::string(),
-        ]);
-    }
-
-    /**
-     * @param EventEngine $eventEngine
-     */
-    public static function describe(EventEngine $eventEngine): void
-    {
-        $eventEngine-&gt;registerType(self::BUILDING, self::building());
-    }
+    return $this-&gt;makeSingleton(MultiModelStore::class, function () {
+        return new ComposedMultiModelStore(
+            $this-&gt;transactionalConnection(),
+            $this-&gt;eventEngineEventStore(),
+            $this-&gt;documentStore()
+        );
+    });
 }
-
 </code></pre>
-<p>We describe <code>Building\State</code> using JSON Schema and register the type in Event Engine.</p>
-<p class="alert alert-warning"><em>Note: Using aggregate state as return type for queries couples the write model with the read model.
-However, you can replace the return type definition at any time. So we can use the short cut
-in an early stage and switch to a decoupled version later.</em></p>
-<p>Next step is to register the query in <code>src/Domain/Api/Query</code>:</p>
-<pre><code class="language-php">&lt;?php
-
-declare(strict_types=1);
-
-namespace MyService\Domain\Api;
-
-use EventEngine\EventEngine;
-use EventEngine\EventEngineDescription;
-use EventEngine\JsonSchema\JsonSchema;
-
-class Query implements EventEngineDescription
+<p>A lot of stuff going on here, so we'll look at it step by step.</p>
+<pre><code class="language-php">public function multiModelStore(): MultiModelStore
+</code></pre>
+<p>It's a <code>public</code> method of the <code>ServiceFactory</code>, therefor <code>EventEngine\Persistence\MultiModelStore</code> becomes the <strong>service id</strong>.
+This means that you can do the following to get the multi model store from Discolight:</p>
+<pre><code class="language-php">$store = $discolight-&gt;get(MultiModelStore::class);
+</code></pre>
+<h2 id="3-7-4">Singleton Service</h2>
+<p>In most cases we want to get the same instance of a service from the container no matter how often we request it. This is called a <code>Singleton</code>.
+Discolight is dead simple. It does not know anything about singletons. Instead we use a pattern called <a href="https://en.wikipedia.org/wiki/Memoization">memoization</a>
+to cache the instance of a service in memory and return it from cache on subsequent calls.</p>
+<p>The <code>ServiceFactory</code> is a complete userland implementation. No interface needs to be implemented. To add memoization to your service factory you can use the provided
+trait <code>EventEngine\Discolight\ServiceRegistry</code> like it is done in the skeleton service factory.</p>
+<pre><code class="language-php">final class ServiceFactory
 {
-    const BUILDING = 'Building';
-
-    public static function describe(EventEngine $eventEngine): void
-    {
-        $eventEngine-&gt;registerQuery(self::BUILDING, JsonSchema::object([
-            'buildingId' =&gt; JsonSchema::uuid(),
-        ]))
-            -&gt;resolveWith(/* ??? */)
-            -&gt;setReturnType(JsonSchema::typeRef(Type::BUILDING));
-    }
-}
-
+    use ServiceRegistry;
+    /* use service traits ... */
 </code></pre>
-<p>Queries are named like the "things" they return. This results in a clean and easy to use message box schema.</p>
-<p class="alert alert-light">Please note that the return type is a reference: <code>JsonSchema::typeRef()</code>.</p>
-<p>Last but not least, the query needs to be handled by a so-called resolver.
-Create a new class called <code>BuildingResolver</code> in a new directory <code>Resolver</code> in <code>src/Domain</code>.</p>
-<pre><code class="language-php">&lt;?php
-declare(strict_types=1);
-
-namespace MyService\Domain\Resolver;
-
-use EventEngine\Messaging\Message;
-use EventEngine\Querying\Resolver;
-
-final class BuildingResolver implements Resolver
+<p>Now you can store service instances in memory:</p>
+<pre><code class="language-php">public function multiModelStore(): MultiModelStore
 {
-    /**
-     * @param Message $query
-     * @return mixed
-     */
-    public function resolve(Message $query)
-    {
-        // TODO: Implement resolve() method.
-    }
+    return $this-&gt;makeSingleton(MultiModelStore::class, function () {
+        //...
+    });
 }
-
 </code></pre>
-<p>The <code>BuildingResolver</code> implements <code>EventEngine\Querying\Resolver</code>. It receives the query message as the only argument.</p>
-<p>Task of the resolver is to query the read model. While looking at snapshots and projections we briefly discussed
-Event Engine's <code>DocumentStore</code> API. The resolver can use it to access documents organized in collections. Let's see
-how that works.</p>
-<pre><code class="language-php">&lt;?php
-declare(strict_types=1);
-
-namespace MyService\Domain\Resolver;
-
-use EventEngine\DocumentStore\DocumentStore;
-use EventEngine\Messaging\Message;
-use EventEngine\Querying\Resolver;
-
-final class BuildingResolver implements Resolver
+<p>You might recognize that we use <code>MultiModelStore::class</code> again as service id for the registry. The second argument of <code>makeSingleton</code> is a closure which acts
+as a <strong>factory function</strong> for the service. When <code>MultiModelStore::class</code> is not in the cache, the factory function is called otherwise the service is returned from the registry.</p>
+<h2 id="3-7-5">Injecting Dependencies</h2>
+<p>Often one service depends on other services. The multi model store requires a <code>TransactionalConnection</code> an <code>EventStore</code> and a <code>DocumentStore</code>
+and because all services are provided by the same <code>ServiceFactory</code> we can simply get those services by calling the appropriate methods.</p>
+<p class="alert alert-light">By default a closure is bound to its parent scope (the service factory instance in this case). Hence, insight the closure we have
+access to all methods of the service factory no matter if they are declared public, protected or private.</p>
+<pre><code class="language-php">public function multiModelStore(): MultiModelStore
 {
-    /**
-     * @var DocumentStore
-     */
-    private $documentStore;
-
-    public function __construct(DocumentStore $documentStore)
-    {
-        $this-&gt;documentStore = $documentStore;
-    }
-
-    /**
-     * @param Message $query
-     * @return array
-     */
-    public function resolve(Message $query): array 
-    {
-        $buildingId = $query-&gt;get('buildingId');
-
-        $buildingDoc = $this-&gt;documentStore-&gt;getDoc('buildings', $buildingId);
-
-        if(!$buildingDoc) {
-            throw new \RuntimeException("Building not found", 404);
-        }
-
-        return $buildingDoc['state'];
-    }
-}
-
-</code></pre>
-<p>The implementation is self explanatory, but a few notes should be made.</p>
-<p>Each Event Engine message has a <code>get</code> and a <code>getOrDefault</code>
-method which are both short cuts to access keys of the message payload. The difference between the two is obvious.
-If the payload key is NOT set and you use <code>get</code> the message will throw an exception. If the payload key is NOT set and you use
-<code>getOrDefault</code> you get back the default passed as the second argument.</p>
-<p>The second note is about <code>$buildingDoc['state']</code>. The document store returns raw data stored as a document.
-And because we use the <code>MultiModeStore</code> to persist aggregate state, it is stored as a snapshot of the form:</p>
-<pre><code class="language-json">{
-  "id": "&lt;aggregate_id&gt;",
-  "doc": {
-    "state": {"state":  {"of":  "the aggregate"}},
-    "version": 1
-  }
+    return $this-&gt;makeSingleton(MultiModelStore::class, function () {
+        return new ComposedMultiModelStore(
+            $this-&gt;transactionalConnection(),
+            $this-&gt;eventEngineEventStore(),
+            $this-&gt;documentStore()
+        );
+    });
 }
 </code></pre>
-<p>We don't want to expose internal storage format to public consumers. Therefor, the resolver only returns
-what is stored in the <code>state</code> property of the document.</p>
-<p class="alert alert-light">We could also use a DTO instead of returning an array to add more type safety to the resolver. The DTO should either has a <code>toArray</code> method
-or implement <code>\JsonSerializable</code> so that the message box can turn it into a JSON response. By the way, the message box is part of
-the skeleton. Feel free to adjust it, if you want to use a serializer library.</p>
-<p>Finally, we need to configure Event Engine's DI container to inject the dependencies into our new resolver.</p>
-<h2 id="2-5-3">Discolight PSR-11 Container</h2>
-<p>Event Engine can use any PSR-11 compatible container. By default it uses a very simple implementation called <code>Discolight</code> included
-in the Event Engine package family. The DI container is inspired by <code>bitExpert/disco</code> but removes the need for annotations.
-Dependencies are aggregated in a single <code>ServiceFactory</code> class which is located directly in <code>src</code>.</p>
-<p>The <code>ServiceFactory</code> pulls dependencies from modules. The skeleton organizes modules by system layers:</p>
-<ul>
-<li>
-<strong>Domain</strong>: contains everything related to the business logic</li>
-<li>
-<strong>Http</strong>: contains the message box and other PSR-15 middleware</li>
-<li>
-<strong>Persistence</strong>: contains classes and definitions related to storage</li>
-<li>
-<strong>System</strong>: contains things like a logger and the default HealthCheckResolver</li>
-</ul>
-<p>Each module has a <code>&lt;Module&gt;Services</code> trait, which is loaded into the <code>ServiceFactory</code>. It's an easy way to group dependencies using
-plain PHP. No configuration files, no magic and IDE support without extra plugins.</p>
-<p class="alert alert-light">When working with Event Engine you'll recognize that you don't need a heavy DI container. You have a single message box instead of a growing
-number of controllers. You don't have heavy application services, but small single purpose ones like the resolver we've just added.
-You don't need repositories for entities, because Event Engine manages persistence based on aggregate logic and descriptions.
-In fact, the entire CQRS / ES application architecture ensures that you use small building blocks and coordinate them by using messages.</p>
-<p>To set up the <code>BuildingResolver</code> adjust <code>src/Domain/DomainServices.php</code>:</p>
-<pre><code class="language-php">&lt;?php
-declare(strict_types=1);
-
-namespace MyService\Domain;
-
-use MyService\Domain\Api\Aggregate;
-use MyService\Domain\Api\Command;
-use MyService\Domain\Api\Event;
-use MyService\Domain\Api\Listener;
-use MyService\Domain\Api\Projection;
-use MyService\Domain\Api\Query;
-use MyService\Domain\Api\Type;
-use MyService\Domain\Resolver\BuildingResolver;
-
-trait DomainServices
+<p>The multi model store interface is service id and return type at the same time. Therefor, PHP's type system ensures at runtime that a valid store is returned.
+Internally, we built a <code>ComposedMultiModelStore</code>. If we want to switch the store
+we can return another implementation.</p>
+<h2 id="3-7-6">Configuration</h2>
+<p>Another thing that is out of scope for Discolight is application configuration. Remember: <em>providing a working <code>ServiceFactory</code> is your task</em>. When services
+need configuration then pass it to the ServiceFactory. The skeleton uses environmental variables mapped to config params in
+<a href="https://github.com/event-engine/php-engine-skeleton/blob/master/config/autoload/global.php#L14">config/autoload/global.php</a>.</p>
+<p>The configuration array is then passed to the <code>ServiceFactory</code> in the constructor and wrapped with an <code>ArrayReader</code>:</p>
+<pre><code class="language-php">final class ServiceFactory
 {
-    public function buildingResolver(): BuildingResolver
-    {
-        return $this-&gt;makeSingleton(BuildingResolver::class, function () {
-            return new BuildingResolver($this-&gt;documentStore());
-        });
-    }
-    
-    public function domainDescriptions(): array
-    {
-        return [
-            Type::class,
-            Command::class,
-            Event::class,
-            Query::class,
-            Aggregate::class,
-            Projection::class,
-            Listener::class,
-        ];
-    }
-}
+    use ServiceRegistry;
 
+    //...
+
+    public function __construct(array $appConfig)
+    {
+        $this-&gt;config = new ArrayReader($appConfig);
+    }
 </code></pre>
-<p class="alert alert-light">A few notes about the trait. It uses methods defined in other <code>&lt;Module&gt;Services</code> traits or in the main <code>ServiceFactory</code>.
-PHPStorm can suggest and resolve methods, because all traits are combined in the ServiceFactory. This allows you to quickly navigate
-the dependency tree. Something that is really painful when using most other DI container solutions.</p>
-<p class="alert alert-light"><code>$this-&gt;makeSingleton()</code> is a helper method that turns the requested service in a singleton. All subsequent calls to <code>buildingResolver()</code> will
-return the same instance instead of a new one. Return services directly if the container should provide a new instance on each <code>$container-&gt;get(Service::class)</code> call.</p>
-<p class="alert alert-light"><code>domainDescriptions()</code> is a method required by the main <code>ServiceFactory</code>. It returns all Event Engine descriptions of the module so that
-they are registered in Event Engine.</p>
-<p>Finally, tell Event Engine that the <code>BuildingResolver</code> is responsible for the <code>Building</code> query:</p>
-<pre><code class="language-php">&lt;?php
-
-declare(strict_types=1);
-
-namespace MyService\Domain\Api;
-
-use EventEngine\EventEngine;
-use EventEngine\EventEngineDescription;
-use EventEngine\JsonSchema\JsonSchema;
-use MyService\Domain\Resolver\BuildingResolver;
-
-class Query implements EventEngineDescription
+<p>This way we have access to the configuration when building our services. We can see this in action in the <a href="https://github.com/event-engine/php-engine-skeleton/blob/master/src/Persistence/PersistenceServices.php#L25">factory method</a> of the <code>\PDO</code> connection:</p>
+<pre><code class="language-php">public function pdoConnection(): \PDO
 {
-    const BUILDING = 'Building';
-
-    public static function describe(EventEngine $eventEngine): void
-    {
-        $eventEngine-&gt;registerQuery(self::BUILDING, JsonSchema::object([
-            'buildingId' =&gt; JsonSchema::uuid(),
-        ]))
-            -&gt;resolveWith(BuildingResolver::class)
-            -&gt;setReturnType(JsonSchema::typeRef(Type::BUILDING));
-    }
-}
-
-</code></pre>
-<p>Ok! We should be able to query buildings by buildingId now. Switch to Swagger and reload the schema (press the "explore" button).
-The Documentation Explorer should show a new Query:  <code>Building</code>.
-If we send that query with the <code>buildingId</code> used in <code>AddBuilding</code>:</p>
-<pre><code class="language-json">{
-  "buildingId": "9ee8d8a8-3bd3-4425-acee-f6f08b8633bb"
+    return $this-&gt;makeSingleton(\PDO::class, function () {
+        $this-&gt;assertMandatoryConfigExists('pdo.dsn');
+        $this-&gt;assertMandatoryConfigExists('pdo.user');
+        $this-&gt;assertMandatoryConfigExists('pdo.pwd');
+        return new \PDO(
+            $this-&gt;config()-&gt;stringValue('pdo.dsn'),
+            $this-&gt;config()-&gt;stringValue('pdo.user'),
+            $this-&gt;config()-&gt;stringValue('pdo.pwd')
+        );
+    });
 }
 </code></pre>
-<p>We get back:</p>
-<pre><code class="language-json">{
-  "name": "Acme Headquarters",
-  "buildingId": "9ee8d8a8-3bd3-4425-acee-f6f08b8633bb"
-}
-</code></pre>
-<p>Awesome, isn't it?</p>
-<h2 id="2-5-4">Optional Query Arguments</h2>
-<p>Resolvers can also handle multiple queries. This is useful when different queries can be resolved by accessing the same
-read model collection. A second query for the <code>BuildingResolver</code> would be one that lists all buildings or a subset filtered
-by name.</p>
-<p>Add the query to <code>src/Domain/Api/Query</code>:</p>
-<pre><code class="language-php">&lt;?php
-
-declare(strict_types=1);
-
-namespace MyService\Domain\Api;
-
-use EventEngine\EventEngine;
-use EventEngine\EventEngineDescription;
-use EventEngine\JsonSchema\JsonSchema;
-use MyService\Domain\Resolver\BuildingResolver;
-
-class Query implements EventEngineDescription
+<p><code>$this-&gt;assertMandatoryConfigExists(/*...*/)</code> is a helper function of the <code>ServiceFactory</code> marked as private. It is ignored by Discolight but we can use
+it within factory methods.</p>
+<pre><code class="language-php">private function assertMandatoryConfigExists(string $path): void
 {
-    const BUILDING = 'Building';
-    const BUILDINGS = 'Buildings'; //&lt;-- New query, note the plural
-
-    public static function describe(EventEngine $eventEngine): void
-    {
-        $eventEngine-&gt;registerQuery(self::BUILDING, JsonSchema::object([
-            'buildingId' =&gt; JsonSchema::uuid(),
-        ]))
-            -&gt;resolveWith(BuildingResolver::class)
-            -&gt;setReturnType(JsonSchema::typeRef(Type::BUILDING));
-
-        //New query
-        $eventEngine-&gt;registerQuery(
-            self::BUILDINGS,
-            JsonSchema::object(
-                [], //No required arguments for this query
-                //Optional argument name, is a nullable string
-                ['name' =&gt; JsonSchema::nullOr(JsonSchema::string()-&gt;withMinLength(1))]
-            )
-        )
-            //Resolve query with same resolver ...
-            -&gt;resolveWith(BuildingResolver::class)
-            //... but return an array of Building type
-            -&gt;setReturnType(JsonSchema::array(
-                JsonSchema::typeRef(Type::BUILDING)
-            ));
+    if(null === $this-&gt;config-&gt;mixedValue($path)) {
+        throw  new \RuntimeException("Missing application config for $path");
     }
+}
+</code></pre>
+<h2 id="3-7-7">Service Alias</h2>
+<p>In some cases using a full qualified class name (FQCN) of an interface or class as service id is not suitable. In such a case you can configure an <strong>alias</strong>
+like shown in the example:</p>
+<pre><code class="language-php">$serviceFactory = new \MyService\ServiceFactory($config);
+
+$container = new \EventEngine\Discolight\Discolight(
+    $serviceFactory,
+    [PostgresEventStore::class =&gt; 'prooph.event_store']
+);
+</code></pre>
+<p>You pass a map of <strong>service id =&gt; alias name</strong> as second argument to Discolight.</p>
+<h2 id="3-7-8">Production Optimization</h2>
+<p>Discolight uses <code>\Reflection</code> to scan the ServiceFactory class and find out about public factory methods and their return types.
+It's a myth that reflection is slow. However, rescanning the ServiceFactory on every request in a production environment just does not make sense.
+Code does not change, so doing it once and remember the result is the better option.</p>
+<pre><code class="language-php">
+$serviceMapCache = null;
+
+if(getenv('APP_ENV') === 'prod' &amp;&amp; file_exists('data/ee.cache.php')) {
+    //Read cache from file
+    $serviceMapCache = require 'data/ee.cache.php';
+}
+
+$serviceFactory = new \MyService\ServiceFactory($config);
+
+$discolight = new \EventEngine\Discolight\Discolight(
+    $serviceFactory,
+    [PostgresEventStore::class =&gt; 'prooph.event_store'],
+    $serviceMapCache // &lt;-- Pass cache as third argument. If it's NULL a rescan is triggered
+);
+
+if(!$serviceMapCache &amp;&amp; getenv('APP_ENV') === 'prod') {
+    // ServiceFactoryMap is an array
+    // var_export turns that array in a string parsable by PHP
+    // The cache file itself is a PHP script that returns the array
+    file_put_contents(
+        'data/ee.cache.php',
+        "&lt;?php\nreturn " . var_export($discolight-&gt;getServiceFactoryMap(), true) . ';'
+    );    
 }
 
 </code></pre>
-<p>The refactored <code>BuildingResolver</code> looks like this:</p>
-<pre><code class="language-php">&lt;?php
-declare(strict_types=1);
-
-namespace MyService\Domain\Resolver;
-
-use EventEngine\DocumentStore\DocumentStore;
-use EventEngine\DocumentStore\Filter\AnyFilter;
-use EventEngine\DocumentStore\Filter\LikeFilter;
-use EventEngine\Messaging\Message;
-use EventEngine\Querying\Resolver;
-use MyService\Domain\Api\Query;
-
-final class BuildingResolver implements Resolver
-{
-    /**
-     * @var DocumentStore
-     */
-    private $documentStore;
-
-    public function __construct(DocumentStore $documentStore)
-    {
-        $this-&gt;documentStore = $documentStore;
-    }
-
-    /**
-     * @param Message $query
-     * @return array
-     */
-    public function resolve(Message $query): array
-    {
-        switch ($query-&gt;messageName()) {
-            case Query::BUILDING:
-                return $this-&gt;resolveBuilding($query-&gt;get('buildingId'));
-            case Query::BUILDINGS:
-                return $this-&gt;resolveBuildings($query-&gt;getOrDefault('name', null));
-        }
-    }
-
-    private function resolveBuilding(string $buildingId): array
-    {
-        $buildingDoc = $this-&gt;documentStore-&gt;getDoc('buildings', $buildingId);
-
-        if(!$buildingDoc) {
-            throw new \RuntimeException("Building not found", 404);
-        }
-
-        return $buildingDoc['state'];
-    }
-
-    private function resolveBuildings(string $nameFilter = null): array
-    {
-        $filter = $nameFilter?
-            new LikeFilter('state.name', "%$nameFilter%")
-            : new AnyFilter();
-
-        $cursor = $this-&gt;documentStore-&gt;filterDocs('buildings', $filter);
-
-        $buildings = [];
-
-        foreach ($cursor as $doc) {
-            $buildings[] = $doc['state'];
-        }
-
-        return $buildings;
-    }
-}
-
-</code></pre>
-<p><code>BuildingResolver</code> can resolve both queries by mapping the query name to an internal <code>resolve*</code> method.
-For the new <code>Buildings</code> query the resolver makes use of <code>DocumentStore\Filter</code>s. The <code>LikeFilter</code> works the same way as
-a SQL like expression using <code>%</code> as a placeholder. <code>AnyFilter</code> matches any documents in the collection.
-There are many more filters available. Read more about filters in the docs (@TODO: link docs).</p>
-<p>You can test the new query using Swagger.
-This is an example query with a name filter:</p>
-<pre><code class="language-json">{
-  "name": "Acme"
-}
-</code></pre>
-<p>Add some more buildings and play with the queries. Try to exchange the <code>LikeFilter</code> with an <code>EqFilter</code> for example.
-Or see what happens if you pass an empty string as name filter.</p>
-<p class="alert alert-info">Since aggregate state is stored as a snapshot, we need to keep in mind that <strong>state</strong> is the root property. Nested keys can be
-referenced using <strong>dot notation</strong> (f.e. "state.name"). If you don't use the MultiModelStore and create your own read models,
-then you don't need that snapshot format. But remember: without the MultiModelStore you definitely need to deal
-with eventual consistency whenever reading data from a read model.</p>
-<p class="alert alert-success">In part VI we get back to the write model and learn how to work with process managers. But before we continue,
-we should clean up our code a bit. Part V describes what we can improve.</p>
 </div>        </div>
     </div>
 </div>
@@ -1248,9 +970,9 @@ we should clean up our code a bit. Part V describes what we can improve.</p>
         <div class="container">
             <div class="row">
                 <div class="prev col-xs-6">
-                                            <a href="https://event-engine.io/tutorial/partIII.html">Previous</a>                                    </div>
+                                            <a href="https://event-engine.io/api/projections/set_up.html">Previous</a>                                    </div>
                 <div class="next col-xs-6">
-                                            <a href="https://event-engine.io/tutorial/partV.html">Next</a>                                    </div>
+                                            <a href="https://event-engine.io/news/">Next</a>                                    </div>
             </div>
         </div>
     </div>

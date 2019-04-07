@@ -14,9 +14,9 @@
 <link rel="apple-touch-icon-precomposed" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/apple-touch-icon-57-precomposed.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@prooph_software">
-<meta name="twitter:title" content="Event Machine">
+<meta name="twitter:title" content="Event Engine">
 <meta name="twitter:description" content="Rapid CQRS / ES framework for PHP with a path to refactor towards a richer domain model as needed.">
-<meta name="twitter:image" content="https://proophsoftware.github.io/event-machine/img/Event_Machine_Intro.png">
+<meta name="twitter:image" content="https://event-engine.io/img/Event_Engine_intro.png">
     <link rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/flatly/bootstrap.min.css">
 <link rel="stylesheet"
@@ -404,6 +404,7 @@
 
     .jumbotron {
        background-color: #04A1B0;
+       margin-top: 60px;
     }
 
     .jumbotron .display-1 {
@@ -593,10 +594,6 @@
     }
 
     @media screen and (max-width: 799px) {
-        .jumbotron {
-            margin-top: 60px;
-        }
-
         .first-row {
             margin-top: 80px;
         }
@@ -794,28 +791,30 @@
         </div>
                 <div class="col-md-9">
 <div id="section-main"><h1 id="3-1-1">Installation</h1>
-<p class="alert alert-important">This page is not migrated yet! <a class="alert-link" href="https://event-engine.io/news/2019-04-05.html#4-1-3">Learn more</a>.</p>
 <p class="alert alert-info">Event Engine is not a full stack framework. Instead you integrate it in any PHP framework that supports <a class="alert-link" href="https://www.php-fig.org/psr/">PHP Standards Recommendations</a>.</p>
 <h2 id="3-1-1-1">Skeleton</h2>
 <p>The easiest way to get started is by using the <a href="https://github.com/event-engine/php-engine-skeleton">skeleton</a>.
-It ships with a preconfigured Event Engine, a recommended project structure, ready-to-use docker containers and Zend Strategility to handle HTTP requests.</p>
+It ships with a preconfigured Event Engine, a recommended project structure, ready-to-use docker containers and <a href="https://github.com/zendframework/zend-stratigility">Zend Strategility</a> to handle HTTP requests.</p>
 <p class="alert alert-light"><em>Again</em>: The skeleton is not the only way to set up Event Engine. You can tweak set up as needed and integrate Event Engine with Symfony, Laravel or any other framework
 or middleware dispatcher.</p>
 <h2 id="3-1-1-2">Required Infrastructure</h2>
 <p>Event Engine is based on <strong>PHP 7.2 or higher</strong>. Package dependencies are installed using <a href="https://getcomposer.org/">composer</a>.</p>
 <h3 id="3-1-1-2-1">Database</h3>
-<p>Event Engine uses <a href="http://docs.getprooph.org/event-store/">prooph/event-store</a> to store <strong>events</strong> recorded by the <strong>write model</strong>
+<p>By default Event Engine uses <a href="http://docs.getprooph.org/event-store/">prooph/event-store</a> to store <strong>events</strong> recorded by the <strong>write model</strong>
 and a <strong>DocumentStore</strong> (see "Document Store" chapter) to store the <strong>read model</strong>.</p>
 <p class="alert alert-info">The skeleton uses prooph's Postgres event store
 and a <a class="alert-link" href="https://github.com/event-engine/php-postgres-document-store">Postgres Document Store</a> implementation.
-This allows Event Engine to work with a single database, but that's not a requirement. You can mix and match as needed and also use
-a storage mechanism not implementing the document store interface by using custom projections (more on that in the "projections" chapter).</p>
+This allows Event Engine to work with a single database, but that's not a requirement. You can mix and match. Event Engine defines a lean
+event store interface, that can be found in the <a href="https://github.com/event-engine/php-event-store/blob/master/src/EventStore.php">event-engine/php-event-store</a> package.
+Projections don't have a hard dependency on the document store, either. A document store is only required when using the <strong>MultiModelStore</strong> feature or the default <strong>aggregate projection</strong>.
+Other than that, you can use whatever you want to persist the read model.</p>
 <h4 id="3-1-1-2-1-1">Creating The Event Stream</h4>
 <p>By default all events are stored in a single stream and <strong>prooph/event-store has to be set up with the SingleStreamStrategy!</strong>
 The reason for this is that projections rely on a guaranteed order of events.
-A single stream is the only way to fulfill this requirement. When using a relational database as an event store a single
+A single stream is the only way to fulfill this requirement.</p>
+<p class="alert alert-light">When using a relational database as an event store a single
 table is also very efficient. A longer discussion about the topic can be found
-in the <a href="https://github.com/prooph/pdo-event-store/issues/139">prooph/pdo-event-store repo</a>.</p>
+in the <a class="alert-link" href="https://github.com/prooph/pdo-event-store/issues/139">prooph/pdo-event-store repo</a>.</p>
 <p>An easy way to create the needed stream is to use the event store API directly.</p>
 <pre><code class="language-php">&lt;?php
 declare(strict_types=1);
@@ -849,7 +848,7 @@ used by Event Engine.</p>
 <h4 id="3-1-1-2-1-2">Read Model Storage</h4>
 <p>Projection storage is set up on the fly. You don't need to prepare it upfront, but you can if you prefer to work with a database migration tool. It is up to you.
 Learn more about read model storage set up in the projections chapter.</p>
-<p class="alert alert-warning">The <strong>Multi-Model-Store</strong> requires existing read model collection. Please find a detailed explanation in <a href="/tutorial/partIII.html#2-4-2">the tutorial</a>.</p>
+<p class="alert alert-warning">The <strong>Multi-Model-Store</strong> requires existing read model collections. Please find a detailed explanation in <a href="/tutorial/partIII.html#2-4-2">the tutorial</a>.</p>
 <h2 id="3-1-1-3">Event Engine Descriptions</h2>
 <p>Event Engine uses a "zero configuration" approach. While you have to configure integrated packages like <em>prooph/event-store</em>, Event Engine itself
 does not require centralized configuration. Instead it loads so called <em>Event Engine Descriptions</em>:</p>
@@ -904,20 +903,23 @@ class Command implements EventEngineDescription
 
 require_once 'vendor/autoload.php';
 
-$eventEngine = new EventEngine();
+$eventEngine = new EventEngine(
+    new OpisJsonSchema() /* Or another Schema implementation */
+);
 
 $eventEngine-&gt;load(App\Api\Command::class);
 
 </code></pre>
+<p class="alert alert-light">Event Engine only requires a <code>EventEngine\Schema\Schema</code> implementation in the constructor. All other dependencies are passed during <strong>initialize</strong> phase (see next section).</p>
 <h2 id="3-1-1-4">Initialize &amp; Bootstrap</h2>
-<p>Event Engine is bootstrapped in three phases. <em>Descriptions</em> are loaded first, followed by a <code>$eventEngine-&gt;initialize()</code> call.
-Finally, <code>$eventEngine-&gt;bootstrap()</code> prepares the system so that it can handle incoming messages.</p>
-<p class="alert alert-light">Bootstrapping is split because the description phase can be skipped in production.
-Read more about this in "Optimize for production" (@TODO link page) chapter.</p>
+<p>Event Engine is bootstrapped in three phases. <strong>Descriptions</strong> are loaded first, followed by a <code>$eventEngine-&gt;initialize(/* dependencies */)</code> call.
+Finally, <code>$eventEngine-&gt;bootstrap($env, $debugMode)</code> prepares the system so that it can handle incoming messages.</p>
+<p class="alert alert-info">Bootstrapping is split because description and initialization phase can be skipped in production.
+Read more about this in <a href="/api/set-up/production_optimization.html">Production Optimization</a>.</p>
 <h3 id="3-1-1-4-1">Initialize</h3>
-<p>Event Engine needs to aggregate information from all <em>Descriptions</em>.
+<p>Event Engine needs to aggregate information from all <strong>Descriptions</strong>.
 This is done in the <em>Initialize phase</em>. The phase also requires mandatory and optional dependencies used by Event Engine.
-See dependency injection (@TODO Link page) for details.</p>
+Details are listed on the <a href="/api/set-up/di.html">Dependencies</a> page.</p>
 <h3 id="3-1-1-4-2">Bootstrap</h3>
 <p>Last, but not least <code>$eventEngine-&gt;bootstrap($environment, $debugMode)</code> starts the engine and we're ready to take off.
 Event Engine supports 3 different environments: <code>dev</code>, <code>prod</code> and <code>test</code>. The environment is mainly used to set up third-party components like a logger.</p>

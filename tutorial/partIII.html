@@ -14,9 +14,9 @@
 <link rel="apple-touch-icon-precomposed" href="https://raw.githubusercontent.com/prooph/proophessor/gh-pages/images/ico/apple-touch-icon-57-precomposed.png">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:site" content="@prooph_software">
-<meta name="twitter:title" content="Event Machine">
+<meta name="twitter:title" content="Event Engine">
 <meta name="twitter:description" content="Rapid CQRS / ES framework for PHP with a path to refactor towards a richer domain model as needed.">
-<meta name="twitter:image" content="https://proophsoftware.github.io/event-machine/img/Event_Machine_Intro.png">
+<meta name="twitter:image" content="https://event-engine.io/img/Event_Engine_intro.png">
     <link rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.5/flatly/bootstrap.min.css">
 <link rel="stylesheet"
@@ -404,6 +404,7 @@
 
     .jumbotron {
        background-color: #04A1B0;
+       margin-top: 60px;
     }
 
     .jumbotron .display-1 {
@@ -593,10 +594,6 @@
     }
 
     @media screen and (max-width: 799px) {
-        .jumbotron {
-            margin-top: 60px;
-        }
-
         .first-row {
             margin-top: 80px;
         }
@@ -827,7 +824,7 @@ final class Building
 }
 </code></pre>
 <p><code>BuildingAdded</code> communicates that a new lifecycle of a building was started (new building was added to our system), so the
-<code>Building::whenBuilidngAdded()</code> function has to return a new state object and does not receive a current state object
+<code>Building::whenBuildingAdded()</code> function has to return a new state object and does not receive a current state object
 as an argument (next when* function will receive one!).</p>
 <p>But what does the <code>State</code> object look like? Well, you can use whatever you want. Event Engine does not care about a particular
 implementation (see docs for details). However, Event Engine ships with a default implementation of an <code>ImmutableRecord</code>.
@@ -891,7 +888,7 @@ public ${STATIC} function ${FIELD_NAME}()#if(${RETURN_TYPE}): ${RETURN_TYPE}#els
 #end
 }
 </code></pre>
-<p>Now we can return a new <code>Building\State</code> from <code>Building::whenBuilidngAdded()</code>.</p>
+<p>Now we can return a new <code>Building\State</code> from <code>Building::whenBuildingAdded()</code>.</p>
 <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
