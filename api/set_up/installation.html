@@ -683,6 +683,15 @@
         color: #ee374b;
         text-decoration: underline;
     }
+
+    .list-toc > li:nth-child(2n+1) {
+        background: none;
+    }
+
+    .list-toc .list-group-item:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+
 </style>
 </head>
 <body data-spy="scroll" data-target="#sideNav" data-offset="50" class="bbt-theme-flatly">
@@ -772,21 +781,34 @@
             <nav class="nav-left hidden-xs hidden-sm" id="sideNav">
     <ul class="nav nav-stacked" data-spy="affix" data-offset-top="59" role="tablist">
                                 <li>
-                <a href="#3-1-1" title="Installation">Installation</a>
+                <a href="#3-1-1" title="Installation">
+                    Installation                </a>
             </li>
                                 <li>
-                <a href="#3-1-1-1" title="Skeleton">Skeleton</a>
+                <a href="#3-1-1-1" title="Skeleton">
+                    Skeleton                </a>
             </li>
                                 <li>
-                <a href="#3-1-1-2" title="Required&#x20;Infrastructure">Required Infrastructure</a>
-            </li>
-                                                                    <li>
-                <a href="#3-1-1-3" title="Event&#x20;Engine&#x20;Descriptions">Event Engine Description...</a>
+                <a href="#3-1-1-2" title="Required&#x20;Infrastructure">
+                    Required Infrastructure                </a>
             </li>
                                 <li>
-                <a href="#3-1-1-4" title="Initialize&#x20;&amp;amp&#x3B;&#x20;Bootstrap">Initialize &amp; Bootstr...</a>
+                <a href="#3-1-1-2-1" title="Database">
+                    &nbsp;&nbsp;&nbsp;&nbsp;Database                </a>
             </li>
-                                    </ul>
+                                                        <li>
+                <a href="#3-1-1-3" title="Descriptions">
+                    Descriptions                </a>
+            </li>
+                                <li>
+                <a href="#3-1-1-4" title="Initialize">
+                    Initialize                </a>
+            </li>
+                                <li>
+                <a href="#3-1-1-5" title="Bootstrap">
+                    Bootstrap                </a>
+            </li>
+            </ul>
 </nav>
         </div>
                 <div class="col-md-9">
@@ -849,9 +871,13 @@ used by Event Engine.</p>
 <p>Projection storage is set up on the fly. You don't need to prepare it upfront, but you can if you prefer to work with a database migration tool. It is up to you.
 Learn more about read model storage set up in the projections chapter.</p>
 <p class="alert alert-warning">The <strong>Multi-Model-Store</strong> requires existing read model collections. Please find a detailed explanation in <a href="/tutorial/partIII.html#2-4-2">the tutorial</a>.</p>
-<h2 id="3-1-1-3">Event Engine Descriptions</h2>
-<p>Event Engine uses a "zero configuration" approach. While you have to configure integrated packages like <em>prooph/event-store</em>, Event Engine itself
-does not require centralized configuration. Instead it loads so called <em>Event Engine Descriptions</em>:</p>
+<h2 id="3-1-1-3">Descriptions</h2>
+<p>Event Engine is bootstrapped in three phases. <strong>Descriptions</strong> are loaded first, followed by a <code>$eventEngine-&gt;initialize(/* dependencies */)</code> call.
+Finally, <code>$eventEngine-&gt;bootstrap($env, $debugMode)</code> prepares the system so that it can handle incoming messages.</p>
+<p class="alert alert-info">Bootstrapping is split because description and initialization phase can be skipped in production.
+Read more about this in <a href="/api/set_up/production_optimization.html">Production Optimization</a>.</p>
+<p>A "zero configuration" approach is used. While you have to configure integrated packages like <em>prooph/event-store</em>, Event Engine itself
+does not require centralized configuration. Instead it loads so called <strong>Event Engine Descriptions</strong>:</p>
 <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -866,7 +892,7 @@ interface EventEngineDescription
 </code></pre>
 <p>Any class implementing the interface can be loaded by Event Engine. The task of a <em>Description</em> is to tell Event Engine how the application is structured.
 This is done in a programmatic way using Event Engine's registration API which we will cover in the next chapter.
-Here is a simple example of a <em>Description</em> that registers a <em>command</em> in Event Engine.</p>
+Here is a simple example of a <strong>Description</strong> that registers a command in Event Engine.</p>
 <pre><code class="language-php">&lt;?php
 declare(strict_types=1);
 
@@ -911,16 +937,11 @@ $eventEngine-&gt;load(App\Api\Command::class);
 
 </code></pre>
 <p class="alert alert-light">Event Engine only requires a <code>EventEngine\Schema\Schema</code> implementation in the constructor. All other dependencies are passed during <strong>initialize</strong> phase (see next section).</p>
-<h2 id="3-1-1-4">Initialize &amp; Bootstrap</h2>
-<p>Event Engine is bootstrapped in three phases. <strong>Descriptions</strong> are loaded first, followed by a <code>$eventEngine-&gt;initialize(/* dependencies */)</code> call.
-Finally, <code>$eventEngine-&gt;bootstrap($env, $debugMode)</code> prepares the system so that it can handle incoming messages.</p>
-<p class="alert alert-info">Bootstrapping is split because description and initialization phase can be skipped in production.
-Read more about this in <a href="/api/set-up/production_optimization.html">Production Optimization</a>.</p>
-<h3 id="3-1-1-4-1">Initialize</h3>
+<h2 id="3-1-1-4">Initialize</h2>
 <p>Event Engine needs to aggregate information from all <strong>Descriptions</strong>.
 This is done in the <em>Initialize phase</em>. The phase also requires mandatory and optional dependencies used by Event Engine.
-Details are listed on the <a href="/api/set-up/di.html">Dependencies</a> page.</p>
-<h3 id="3-1-1-4-2">Bootstrap</h3>
+Details are listed on the <a href="/api/set_up/di.html">Dependencies</a> page.</p>
+<h2 id="3-1-1-5">Bootstrap</h2>
 <p>Last, but not least <code>$eventEngine-&gt;bootstrap($environment, $debugMode)</code> starts the engine and we're ready to take off.
 Event Engine supports 3 different environments: <code>dev</code>, <code>prod</code> and <code>test</code>. The environment is mainly used to set up third-party components like a logger.</p>
 <p>Same is true for the <code>debug mode</code>. It can be used to enable verbose logging or displaying of exceptions even if Event Engine runs in prod environment.

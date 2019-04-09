@@ -683,6 +683,15 @@
         color: #ee374b;
         text-decoration: underline;
     }
+
+    .list-toc > li:nth-child(2n+1) {
+        background: none;
+    }
+
+    .list-toc .list-group-item:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+
 </style>
 </head>
 <body data-spy="scroll" data-target="#sideNav" data-offset="50" class="bbt-theme-flatly">
@@ -772,24 +781,54 @@
             <nav class="nav-left hidden-xs hidden-sm" id="sideNav">
     <ul class="nav nav-stacked" data-spy="affix" data-offset-top="59" role="tablist">
                                 <li>
-                <a href="#3-4" title="Immutable&#x20;State">Immutable State</a>
+                <a href="#3-4" title="Immutable&#x20;State">
+                    Immutable State                </a>
             </li>
                                 <li>
-                <a href="#3-4-1" title="PHPStorm&#x20;Templates">PHPStorm Templates</a>
+                <a href="#3-4-1" title="PHPStorm&#x20;Templates">
+                    PHPStorm Templates                </a>
             </li>
                                 <li>
-                <a href="#3-4-2" title="Scalar&#x20;Value&#x20;Objects">Scalar Value Objects</a>
+                <a href="#3-4-2" title="Scalar&#x20;Value&#x20;Objects">
+                    Scalar Value Objects                </a>
             </li>
                                 <li>
-                <a href="#3-4-3" title="Specialized&#x20;Scalar&#x20;Types">Specialized Scalar Types</a>
-            </li>
-                                                        <li>
-                <a href="#3-4-4" title="List&#x20;&#x2F;&#x20;Collection">List / Collection</a>
+                <a href="#3-4-3" title="Specialized&#x20;Scalar&#x20;Types">
+                    Specialized Scalar Types                </a>
             </li>
                                 <li>
-                <a href="#3-4-5" title="Complex&#x20;Types">Complex Types</a>
+                <a href="#3-4-3-1" title="vo_uuid">
+                    &nbsp;&nbsp;&nbsp;&nbsp;vo_uuid                </a>
             </li>
-                                                            </ul>
+                                <li>
+                <a href="#3-4-3-2" title="vo_datetime">
+                    &nbsp;&nbsp;&nbsp;&nbsp;vo_datetime                </a>
+            </li>
+                                <li>
+                <a href="#3-4-4" title="List&#x20;&#x2F;&#x20;Collection">
+                    List / Collection                </a>
+            </li>
+                                <li>
+                <a href="#3-4-5" title="Complex&#x20;Types">
+                    Complex Types                </a>
+            </li>
+                                <li>
+                <a href="#3-4-5-1" title="fromArray&#x20;vs.&#x20;fromRecordData">
+                    &nbsp;&nbsp;&nbsp;&nbsp;fromArray vs. fromRecord...                </a>
+            </li>
+                                <li>
+                <a href="#3-4-5-2" title="Nullable&#x20;Properties">
+                    &nbsp;&nbsp;&nbsp;&nbsp;Nullable Properties                </a>
+            </li>
+                                <li>
+                <a href="#3-4-5-3" title="Array&#x20;Properties">
+                    &nbsp;&nbsp;&nbsp;&nbsp;Array Properties                </a>
+            </li>
+                                <li>
+                <a href="#3-4-5-4" title="Initialize&#x20;Properties">
+                    &nbsp;&nbsp;&nbsp;&nbsp;Initialize Properties                </a>
+            </li>
+            </ul>
 </nav>
         </div>
                 <div class="col-md-9">
@@ -797,8 +836,8 @@
 <p>Using immutable objects whenever possible results in robust implementations. Function calls and state changes become predictable.
 Using value objects instead of raw data structures like arrays or plain strings adds type safety, acts as documentation and makes code much more
 readable. All very important properties for long-lived applications that are constantly reshaped.</p>
-<p>The <code>EventEngine\Data</code> package provides useful helpers to speed up development of immutable objects. In fact, when using the Prototyping or Functional
-Flavour <strong>all application state should be immutable</strong>.</p>
+<p>The <a href="https://github.com/event-engine/php-data">EventEngine\Data</a> package provides useful helpers to speed up development of immutable objects.
+In fact, when using the Prototyping or Functional Flavour <strong>all application state should be immutable</strong>.</p>
 <p class="alert alert-warning">For the OOP Flavour the only exception are Aggregate Roots. But even then it's recommended
 to use a single internal state property within the AR that references immutable state and is the only mutable part of the object.</p>
 <h2 id="3-4-1">PHPStorm Templates</h2>
@@ -811,7 +850,7 @@ introduce bugs due to typos.</p>
 <p class="alert alert-info">Keep in mind that both FPP and EventEngine\Data are only suggestions. You don't have to use them. It's also fine if you prefer working with a serializer library.</p>
 <p>The <code>EventEngine\Data</code> package contains a set of live templates specifically designed to work together with the <code>EventEngine\Data\ImmutableRecord</code>.</p>
 <p>You can import the templates by following official <a href="https://www.jetbrains.com/help/phpstorm/sharing-live-templates.html">PHPStorm instructions</a>.
-Please find the <code>settings.zip</code> <a href="https://github.com/event-engine/php-engine/blob/master/.env/PHPStorm/settings.zip">here</a>.</p>
+Please find the <code>settings.zip</code> <a href="https://github.com/event-engine/php-data/blob/master/.env/PHPStorm/settings.zip">here</a>.</p>
 <h2 id="3-4-2">Scalar Value Objects</h2>
 <p>Each scalar PHP type (string, int, float, bool) has a corresponding template that you can access by typing <code>vo_&lt;scalar type&gt;</code> in a PHP file.</p>
 <ol>
@@ -1105,7 +1144,7 @@ Always use the <code>init()</code> hook for setting default values.</p>
         <div class="container">
             <div class="row">
                 <div class="prev col-xs-6">
-                                            <a href="https://event-engine.io/api/functional_flavour.html">Previous</a>                                    </div>
+                                            <a href="https://event-engine.io/api/functional_core.html">Previous</a>                                    </div>
                 <div class="next col-xs-6">
                                             <a href="https://event-engine.io/api/document_store/">Next</a>                                    </div>
             </div>

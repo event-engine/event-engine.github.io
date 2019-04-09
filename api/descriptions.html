@@ -683,6 +683,15 @@
         color: #ee374b;
         text-decoration: underline;
     }
+
+    .list-toc > li:nth-child(2n+1) {
+        background: none;
+    }
+
+    .list-toc .list-group-item:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+
 </style>
 </head>
 <body data-spy="scroll" data-target="#sideNav" data-offset="50" class="bbt-theme-flatly">
@@ -772,26 +781,78 @@
             <nav class="nav-left hidden-xs hidden-sm" id="sideNav">
     <ul class="nav nav-stacked" data-spy="affix" data-offset-top="59" role="tablist">
                                 <li>
-                <a href="#3-2" title="Descriptions">Descriptions</a>
+                <a href="#3-2" title="Descriptions">
+                    Descriptions                </a>
             </li>
                                 <li>
-                <a href="#3-2-1" title="Registration&#x20;API">Registration API</a>
+                <a href="#3-2-1" title="Registration&#x20;API">
+                    Registration API                </a>
             </li>
                                 <li>
-                <a href="#3-2-2" title="Message&#x20;Payload&#x20;Schema">Message Payload Schema</a>
+                <a href="#3-2-2" title="Message&#x20;Payload&#x20;Schema">
+                    Message Payload Schema                </a>
             </li>
                                 <li>
-                <a href="#3-2-3" title="Command&#x20;Registration">Command Registration</a>
+                <a href="#3-2-3" title="Command&#x20;Registration">
+                    Command Registration                </a>
             </li>
                                 <li>
-                <a href="#3-2-4" title="Command&#x20;Processing">Command Processing</a>
+                <a href="#3-2-4" title="Command&#x20;Processing">
+                    Command Processing                </a>
+            </li>
+                                <li>
+                <a href="#3-2-4-1" title="process&#x28;&#x29;">
+                    &nbsp;&nbsp;&nbsp;&nbsp;process()                </a>
+            </li>
+                                <li>
+                <a href="#3-2-4-2" title="withNew&#x28;&#x29;">
+                    &nbsp;&nbsp;&nbsp;&nbsp;withNew()                </a>
+            </li>
+                                <li>
+                <a href="#3-2-4-3" title="identifiedBy&#x28;&#x29;">
+                    &nbsp;&nbsp;&nbsp;&nbsp;identifiedBy()                </a>
+            </li>
+                                <li>
+                <a href="#3-2-4-4" title="withExisting&#x28;&#x29;">
+                    &nbsp;&nbsp;&nbsp;&nbsp;withExisting()                </a>
+            </li>
+                                <li>
+                <a href="#3-2-4-5" title="provideContext&#x28;&#x29;">
+                    &nbsp;&nbsp;&nbsp;&nbsp;provideContext()                </a>
+            </li>
+                                <li>
+                <a href="#3-2-4-6" title="handle&#x28;&#x29;">
+                    &nbsp;&nbsp;&nbsp;&nbsp;handle()                </a>
+            </li>
+                                <li>
+                <a href="#3-2-4-7" title="recordThat&#x28;&#x29;&#x20;&amp;amp&#x3B;&#x20;apply&#x28;&#x29;">
+                    &nbsp;&nbsp;&nbsp;&nbsp;recordThat() &amp; apply...                </a>
+            </li>
+                                <li>
+                <a href="#3-2-4-8" title="storeStateIn&#x28;&#x29;">
+                    &nbsp;&nbsp;&nbsp;&nbsp;storeStateIn()                </a>
+            </li>
+                                <li>
+                <a href="#3-2-4-9" title="storeEventsIn&#x28;&#x29;">
+                    &nbsp;&nbsp;&nbsp;&nbsp;storeEventsIn()                </a>
+            </li>
+                                <li>
+                <a href="#3-2-5" title="passToController&#x28;&#x29;">
+                    passToController()                </a>
+            </li>
+                                <li>
+                <a href="#3-2-6" title="Event&#x20;Registration">
+                    Event Registration                </a>
+            </li>
+                                <li>
+                <a href="#3-2-7" title="Attach&#x20;Process&#x20;Manager">
+                    Attach Process Manager                </a>
             </li>
             </ul>
 </nav>
         </div>
                 <div class="col-md-9">
 <div id="section-main"><h1 id="3-2">Descriptions</h1>
-<p class="alert alert-important">This page is not migrated yet! <a class="alert-link" href="https://event-engine.io/news/2019-04-05.html#4-1-3">Learn more</a>.</p>
 <p>In the previous chapter "Set Up" we already learned that Event Engine loads <code>EventEngineDescription</code>s and passes itself as the only argument
 to a static <code>describe</code> method.</p>
 <pre><code class="language-php">&lt;?php
@@ -806,8 +867,8 @@ interface EventEngineDescription
 }
 
 </code></pre>
-<p>Descriptions need to be loaded <strong>before</strong> <code>EventEngine::initialize()</code> is called.</p>
-<p class="alert alert-info">In the skeleton descriptions are listed in <a class="alert-link" href="https://github.com/event-engine/php-engine-skeleton/blob/master/src/Domain/DomainServices.php#L16">src/Domain/DomainServices.php</a>
+<p class="alert alert-warning">Descriptions need to be loaded <strong>before</strong> <code>EventEngine::initialize()</code> is called.</p>
+<p class="alert alert-light">In the skeleton descriptions are listed in <a class="alert-link" href="https://github.com/event-engine/php-engine-skeleton/blob/master/src/Domain/DomainServices.php#L16">src/Domain/DomainServices.php</a>
 and this list is read by the event engine factory method in <code>src/ServiceFactory</code>:</p>
 <pre><code class="language-php">public function eventEngine($notInitialized = false): EventEngine
 {
@@ -818,9 +879,10 @@ and this list is read by the event engine factory method in <code>src/ServiceFac
         }
         return $eventEngine;
     }
+    
     $this-&gt;assertContainerIsset();
+    
     return $this-&gt;makeSingleton(EventEngine::class, function () {
-        //@TODO Load from cached config, if it exists
         $eventEngine = new EventEngine(new OpisJsonSchema());
         foreach ($this-&gt;eventEngineDescriptions() as $description) {
             $eventEngine-&gt;load($description);
@@ -838,10 +900,11 @@ and this list is read by the event engine factory method in <code>src/ServiceFac
 <p class="alert alert-info"><strong>Organising Descriptions:</strong>
 If you followed the tutorial, you already know that you can avoid code duplication and typing errors with a few simple tricks.
 Clever combinations of class and constant names can provide readable code without much effort. The skeleton ships with default Event Engine Descriptions
-to support you with that idea. You can find them in <a class="alert-link" href="https://github.com/proophsoftware/event-machine-skeleton/tree/master/src/Api">src/Api</a></p>
+to support you with that idea. You can find them in <a class="alert-link" href="https://github.com/event-engine/php-engine-skeleton/tree/master/src/Domain/Api">src/Domain/Api</a></p>
 <h2 id="3-2-1">Registration API</h2>
-<p>Event Engine provides various <code>registration</code> methods. Those methods can only be called during <strong>description phase</strong> (see "Set Up" chapter for details about bootstrap phases).
-Here is an overview of available methods:</p>
+<p>Event Engine provides various <code>registration</code> methods. Those methods can only be called during <strong>description phase</strong>.</p>
+<p class="alert alert-light">See <a href="/api/set-up/installation.html#3-1-1-3">Set Up chapter</a> for details about bootstrap phases.</p>
+<p>Here is an overview of available methods:</p>
 <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -857,7 +920,7 @@ final class EventEngine implements MessageDispatcher, AggregateStateStore
     /**
      * Add a command message to the system along with its payload schema
      */
-    public function registerCommand(string $commandName, ObjectType $schema): self
+    public function registerCommand(string $commandName, PayloadSchema $schema): self
     {
         //...
     }
@@ -865,42 +928,71 @@ final class EventEngine implements MessageDispatcher, AggregateStateStore
     /**
      * Add an event message to the system along with its payload schema
      */
-    public function registerEvent(string $eventName, ObjectType $schema): self
+    public function registerEvent(string $eventName, PayloadSchema $schema): self
     {
         //...
     }
 
     /**
-     * Add a query message to the system along with its payload schema
+     * Add a query message to the system along with its payload schema (optional for queries)
      */
-    public function registerQuery(string $queryName, ObjectType $payloadSchema = null): QueryDescription
+    public function registerQuery(string $queryName, PayloadSchema $payloadSchema = null): QueryDescription
+    {
+        //...
+    }
+    
+    /**
+     * Add a data type to the system along with its schema
+     */
+    public function registerResponseType(string $nameOrImmutableRecordClass, ResponseTypeSchema $schema = null): void
     {
         //...
     }
 
     /**
-     * Add a data type to the system along with its json schema
+     * Alias for registerResponseType()
      */
-    public function registerType(string $nameOrImmutableRecordClass, ObjectType $schema = null): void
+    public function registerType(string $nameOrImmutableRecordClass, ResponseTypeSchema $schema = null): void
     {
         //...
     }
-
+    
     /**
-     * Add an enum type to the system along with its json schema
+     * Add an input data type to the system along with its schema
+     * 
+     * If the schema implemenation distinguishes between input and data types (f.e. a GraphQL implementation)
+     * you can use registerReponseType() and registerInputType() explicitly 
      */
-    public function registerEnumType(string $typeName, EnumType $schema): void
+    public function registerInputType(string $nameOrImmutableRecordClass, InputTypeSchema $schema = null): void
     {
         //...
     }
 
     /**
      * Service id or instance of a CommandPreProcessor invoked before command is dispatched
+     * 
+     * You can register many preprocessors per command. Think of it like a middleware pipeline.
      *
      * @param string $commandName
      * @param string | CommandPreProcessor $preProcessor
      */
     public function preProcess(string $commandName, $preProcessor): self
+    {
+        //...
+    }
+    
+    /**
+     * Service id or callable command controller invoked for command instead of an aggregate
+     *
+     * You can use controllers for non-aggregate business logic, migrations and more
+     * A command can either be handled by an aggregate or a controller. 
+     * Event Engine takes care of this. 
+     * 
+     * @param string $commandName
+     * @param string|callable $controller
+     * @return EventEngine
+     */
+    public function passToController(string $commandName, $controller): self
     {
         //...
     }
@@ -937,12 +1029,13 @@ final class EventEngine implements MessageDispatcher, AggregateStateStore
 
 </code></pre>
 <h2 id="3-2-2">Message Payload Schema</h2>
-<p>Messages are like HTTP requests, but they are protocol agnostic. For HTTP requests/responses PHP-FIG has defined a standard known as PSR-7. Event Engine messages on the other hand are <a href="https://github.com/prooph/common/blob/master/docs/messaging.md">prooph/common messages</a>.</p>
+<p>Messages are like HTTP requests, but they are protocol agnostic. For HTTP requests/responses PHP-FIG has defined a standard known as PSR-7. Event Engine messages on the other hand are similar to <a href="https://github.com/prooph/common/blob/master/docs/messaging.md">prooph/common messages</a>.</p>
 <p>Like HTTP requests <strong>messages should be validated before doing anything with them</strong>. It can become a time consuming task to write validation logic for each message
-by hand. Hence, Event Engine has a built-in way to validate messages using <a href="http://json-schema.org/specification-links.html#draft-6">Json Schema Draft 6</a>.
-You do this using <code>JsonSchema</code> wrapper objects provided by Event Engine. Those objects are simple to use and drastically improve
+by hand. Hence, Event Engine has a built-in way to validate messages using a <a href="#">Schema</a> (@TODO add link).</p>
+<p>The package <a href="https://github.com/event-engine/php-json-schema">event-engine/php-json-schema</a> provides a <a href="http://json-schema.org/specification-links.html#draft-6">Json Schema Draft 6</a> compatible implementation.</p>
+<p>You can use <code>JsonSchema</code> wrapper objects. Those objects are easy to use and drastically improve
 readability of the code.</p>
-<p>Again the command registration example from the previous chapter:</p>
+<p>Here is a command registration example:</p>
 <pre><code class="language-php">$eventEngine-&gt;registerCommand(
     self::REGISTER_USER,
     JsonSchema::object([
@@ -952,9 +1045,10 @@ readability of the code.</p>
     ])
 );
 </code></pre>
-<p>This code speaks for itself, doesn't it? It is beautiful and clean (IMHO) and once you're used to it you can add new messages to the system in less than 30 seconds.
-The chapter about "Json Schema" covers all the details. Make sure to check it out.</p>
-<p class="alert alert-info">A nice side effect of this approach is out-of-the-box <a class="alert-link" href="https://swagger.io/tools/swagger-ui/">Swagger UI</a> support. Learn more about it in the "Swagger UI" chapter.</p>
+<p class="alert alert-success">This code speaks for itself, doesn't it? Once you're used to it you can add new messages to the system in less than 30 seconds.
+The chapter about <a href="#">Json Schema</a> (@TODO add link) covers all the details. Make sure to check it out.</p>
+<p class="alert alert-light">A nice side effect of this approach is out-of-the-box <a class="alert-link" href="https://swagger.io/tools/swagger-ui/">Swagger UI</a> support.
+Learn more about it in the <a href="#">Swagger UI</a> (@TODO add link) chapter.</p>
 <h2 id="3-2-3">Command Registration</h2>
 <p>Event Engine needs to know which commands can be processed by the system. Therefor, you have to register them before defining processing logic.</p>
 <p class="alert alert-light">Software developed with Event Engine follows a Command-Query-Responsibility-Segregation (short CQRS) approach.
@@ -1002,17 +1096,173 @@ multiple steps. Each step is triggered by a command and there is only one active
 <p><img src="https://event-engine.io/api/img/order_stream.png" alt="Order Stream"></p>
 <p>In Event Engine aggregate functions are <strong>stateless</strong>. You can use plain PHP functions or classes with static public methods.</p>
 <p>Before we dive deeper into aggregate functions, let's have a look at how commands are processed.
-The following gif shows the power of Event Engine Descriptions especially <code>CommandProcessingDescription</code>.
-A fluent interface mixed with clever class and constant naming + modern IDE support (PHPStorm in this case)
+The following gif shows a <code>CommandProcessingDescription</code>.</p>
+<p class="alert alert-success">A fluent interface mixed with clever class and constant naming + modern IDE support (PHPStorm in this case)
 can assist you while putting together the pieces. You need to remember less which frees your mind to reason more about
-the logic you're developing. This results in a higher quality business logic, written in a shorter time.
+the logic you're developing. This results in a <strong>higher quality business logic, written in a shorter time.</strong>
 Try it yourself. It's actually a lot of fun to work with Event Engine.</p>
-<p class="alert alert-light">Keep an eye on the array callable syntax: <code>[ShoppingCart::class, 'addItem']</code>. PHPStorm provides code completion for it and respects it while renaming methods and classes.
+<p class="alert alert-info">Keep an eye on the array callable syntax: <code>[ShoppingCart::class, 'addItem']</code>. PHPStorm provides code completion for it and respects it while renaming methods and classes.
 That's an awesome feature and makes the syntax save to use.</p>
 <p><img src="https://event-engine.io/api/img/desc.gif" alt="Command Processing Description"></p>
-<p>Event Engine Descriptions keep glue code outside of the core business logic. This reduces "noise" in the core and creates
+<p class="alert alert-success">Event Engine Descriptions keep glue code outside of the core business logic. This reduces "noise" in the core and creates
 a central overview for navigation through the code.</p>
-<p class="alert alert-info">Details about the various Description types can be found in their respective chapters like "aggregates", "event listeners" and "projections".</p>
+<p>Let's go through the CommandProcessingDescription step by step.</p>
+<h3 id="3-2-4-1">process()</h3>
+<p>The <code>process(string $commandName)</code> method takes a command name as input and starts a <strong>CommandProcessingDescription</strong> for that command.</p>
+<p class="alert alert-warning">If the command is not registered or a second processing description exists for it, Event Engine raises an exception.
+There can always only be one handler for a command be it an aggregate or a controller. You can only attach multiple
+command preprocessors to the same command.</p>
+<pre><code class="language-php">$eventEngine-&gt;process(Command::START_SHOPPING_SESSION)
+</code></pre>
+<h3 id="3-2-4-2">withNew()</h3>
+<p class="alert alert-info">Event Engine Descriptions are really meant to be descriptive. This way you can internalize the required steps
+to build a CQRS / ES system. The descriptions also serve as documentation. A developer new to the system just needs
+to read them to get an idea of the structure and business logic.</p>
+<p>That said, description methods are named to form a sentence. If a command should create a new aggregate use <code>withNew(string $aggregateType)</code> after <code>process()</code>
+and pass the aggregate type as an argument:</p>
+<pre><code class="language-php">$eventEngine-&gt;process(Command::START_SHOPPING_SESSION)
+    -&gt;withNew(Aggregate::SHOPPING_CART)
+</code></pre>
+<h3 id="3-2-4-3">identifiedBy()</h3>
+<p>If a new aggregate should be created, you have to tell Event Engine which command property contains the aggregate identifier. This is done
+with <code>identifiedBy(string $identifierPropName)</code>:</p>
+<pre><code class="language-php">$eventEngine-&gt;process(Command::START_SHOPPING_SESSION)
+    -&gt;withNew(Aggregate::SHOPPING_CART)
+    -&gt;identifiedBy(Payload::SHOPPING_CART_ID)
+</code></pre>
+<p>You can omit <code>identifiedBy()</code> in further CommandProcessingDescriptions addressing the same aggregate type as long as all commands and events always contain the same
+aggregate identifier property. If this is not the case, you can also add <code>identifiedBy()</code> after <code>withExisting()</code> to define an alternative property name for the specific command
+and related events.</p>
+<p class="alert alert-warning">If you omit <code>identifiedBy()</code> at all, Event Engine uses the default property name <code>id</code> and throws an exception if the command does not contain it.</p>
+<h3 id="3-2-4-4">withExisting()</h3>
+<p>Like the name suggests, <code>withExisting(string $aggregateType)</code> should be used if a command addresses an existing aggregate. Event Engine will use the aggregate type and the identifier property from the
+command to look up the aggregate and bring it into current state ready to handle the command.</p>
+<p class="alert alert-success">Loading aggregates is managed by Event Engine internally. No command handlers or repositories required.</p>
+<pre><code class="language-php">$eventEngine-&gt;process(Command::ADD_ITEM)
+    -&gt;withExisting(Aggregate::SHOPPING_CART)
+</code></pre>
+<h3 id="3-2-4-5">provideContext()</h3>
+<p><code>provideContext(string $providerServiceId)</code> allows you to attach a context provider
+to the command. It should be a <strong>service id</strong>. Event Engine pulls the context provider from the <a href="/api/set_up/di.html#3-1-2-5">PSR-11 container</a>.</p>
+<pre><code class="language-php">$eventEngine-&gt;process(Command::ADD_ITEM)
+    -&gt;withExisting(Aggregate::SHOPPING_CART)
+    -&gt;provideContext(AddItemContextProvider::class)
+</code></pre>
+<p class="alert alert-light">Aggregate functions should not have any side effects. This is explained in the <a href="/api/aggregates/functional_core.html">Functional Core</a> chapter.
+But to make decisions like: "Should a command be handled or not and in what way?" - an aggregate sometimes requires information not included in its own state.
+This information needs to be loaded either from an external system or a database. To keep aggregates focused on the business logic, external
+information should be loaded beforehand. A context provider takes care of loading information. It can manage communication, deal with errors and caching.
+Once loaded, the information is handed over as context to the aggregate function.</p>
+<p class="alert alert-danger">While Event Engine makes no assumptions about the context format, it is highly recommended to only use <a href="/api/state/immutable_state.html">immutable objects</a> as contexts.
+In rare cases it might be required to pass a data resolver down to the aggregate, f.e. if the aggregate needs to decide if external data is really needed and fetching it beforehand is too costly.
+You can use a context object to pass dependencies into aggregate functions. But use it with care!</p>
+<h3 id="3-2-4-6">handle()</h3>
+<p><code>handle(callable $aggregateFunc)</code> takes a <code>callable</code> as input. This is usually the aggregate function responsible for handling the command.</p>
+<pre><code class="language-php">$eventEngine-&gt;process(Command::ADD_ITEM)
+    -&gt;withExisting(Aggregate::SHOPPING_CART)
+    -&gt;provideContext(AddItemContextProvider::class)
+    -&gt;handle([ShoppingCart::class, 'addItem'])
+</code></pre>
+<p class="alert alert-light">The recommended approach is to group aggregate functions in classes using static class methods. This way, you can use PHP's array callable syntax like shown in the example.
+Thanks to the syntax, Event Engine can cache the Description. If you pass a <code>Closure</code> to <code>handle()</code>, caching won't work, because closures can't be exported. Event Engine takes
+care of that limitation and throws an exception if needed.</p>
+<p class="alert alert-warning">If you use the <code>OopFlavour</code> please refer to the <a class="alert-link" href="/tutorial/bonus_IV.html">OopFlavour tutorial part</a>.
+It explains how to describe command processing when aggregate functions are not stateless.</p>
+<h3 id="3-2-4-7">recordThat() &amp; apply()</h3>
+<p>Tell Event Engine what possible events are yielded for a command using <code>recordThat(string $eventName)</code> or one of the aliases <code>andRecordThat(string $eventName)</code> or <code>orRecordThat(string $eventName)</code>.
+Every <code>recordThat()</code> call should be followed by an <code>apply(callable $eventApplyFunc)</code> call, which takes a <code>callable</code> aggregate apply function for the event as argument.</p>
+<pre><code class="language-php">$eventEngine-&gt;process(Command::ADD_ITEM)
+    -&gt;withExisting(Aggregate::SHOPPING_CART)
+    -&gt;provideContext(AddItemContextProvider::class)
+    -&gt;handle([ShoppingCart::class, 'addItem'])
+    -&gt;recordThat(Event::ITEM_ADDED)
+    -&gt;apply([ShoppingCart::class, 'whenItemAdded'])
+    -&gt;andRecordThat(Event::FREE_SHIPPING_ENABLED)
+    -&gt;apply([ShoppingCart::class, 'whenFreeShippingEnabled']);
+</code></pre>
+<p class="alert alert-info">The aggregate handle function doesn't need to yield all specified events each time and the recordThat aliases are only defined for better readability.
+The important thing is, that Event Engine knows all events and their corresponding apply functions.</p>
+<h3 id="3-2-4-8">storeStateIn()</h3>
+<p><code>storeStateIn(string $collection)</code> tells Event Engine to store the aggregate state in the specified document store collection.
+This description only takes effect when using a <a href="#">Multi-Model-Store</a> (@TODO add link). It can only be used when describing
+command processing for a <strong>NEW</strong> aggregate:</p>
+<pre><code class="language-php">$eventEngine-&gt;process(Command::START_SHOPPING_SESSION)
+    -&gt;withNew(Aggregate::SHOPPING_CART)
+    -&gt;identifiedBy(Payload::SHOPPING_CART_ID)
+    -&gt;storeStateIn('shopping_carts')
+    // ...
+</code></pre>
+<p class="alert alert-info">If you don't specify a collection, Event Engine defaults to:</p>
+<pre><code class="language-php">$aggregateCollection = AggregateProjector::aggregateCollectionName(
+   '0.1.0', // &lt;- Default projection version
+   Aggregate::SHOPPING_CART // &lt;- Aggregate type of command processing description
+);
+
+echo $aggregateCollection; // em_ds_shopping_cart_0_1_0
+</code></pre>
+<p class="alert alert-warning">Make sure to create the collection upfront! It is <strong>NOT</strong> created automatically by Event Engine.
+The tutorial provides some <a href="/tutorial/partIII.html#2-4-2">guidance</a>.</p>
+<h3 id="3-2-4-9">storeEventsIn()</h3>
+<p>By default, Event Engine writes all events into its <code>WriteModelStream</code>. If you wish to write events for a certain
+aggregate type into a separate stream, you can use <code>storeEventsIn(string $streamName)</code>. Like <code>storeStateIn()</code>, you can
+define an alternative stream only when describing command processing for a <strong>new</strong> aggregate.</p>
+<pre><code class="language-php">$eventEngine-&gt;process(Command::START_SHOPPING_SESSION)
+    -&gt;withNew(Aggregate::SHOPPING_CART)
+    -&gt;identifiedBy(Payload::SHOPPING_CART_ID)
+    -&gt;storeStateIn('shopping_carts')
+    -&gt;storeEventsIn('shopping_cart_history')
+    // ...
+</code></pre>
+<p class="alert alert-warning">You need to take care of creating alternative event streams. The skeleton includes an <a href="https://github.com/event-engine/php-engine-skeleton/blob/master/scripts/create_event_stream.php">example script</a>.
+Just change the stream name.</p>
+<h2 id="3-2-5">passToController()</h2>
+<p>If you don't want to handle a command with an aggregate, you can pass it to a <a href="#">command controller</a> (@TODO add link) instead:</p>
+<pre><code class="language-php">$eventEngine-&gt;passToController(MyCommandController::class);
+</code></pre>
+<p>The controller instance is pulled from the <a href="/api/set_up/di.html#3-1-2-5">PSR-11 container</a> using the <strong>service id</strong> handed over to <code>passToController()</code>.</p>
+<p class="alert alert-warning">A command can either be handled by a controller or an aggregate, but not both. A command always has one handler only.</p>
+<h2 id="3-2-6">Event Registration</h2>
+<p>Event registration works similar to command registration <a href="#3-2-3">described above</a>.
+Before you can reference events in <a href="#3-2-4">command processing descriptions</a> they need to be known by Event Engine.
+This mechanism protects you from silly mistakes like misspelling an event name or forgetting to define a schema for it.</p>
+<pre><code class="language-php">$eventEngine-&gt;registerEvent(
+    self::USER_REGISTERED,
+    JsonSchema::object([
+        Payload::USER_ID =&gt; Schema::userId(),
+        Payload::USERNAME =&gt; Schema::username(),
+        Payload::EMAIL =&gt; Schema::email(),
+    ])
+);
+</code></pre>
+<h2 id="3-2-7">Attach Process Manager</h2>
+<p>One of the strengths of Event Sourcing is the ability to automate processes using an Event-Driven approach. This means, that follow up actions can be triggered when certain events
+occur. Those automatic triggers are called process managers. Here is an example how you attach a process manager to an event:</p>
+<pre><code class="language-php">$eventEngine-&gt;on(Event::USER_REGISTERED, SendWelcomeEmail::class);
+</code></pre>
+<p>If a process manager has dependencies, pass a <strong>service id</strong> to <code>$eventEngine-&gt;on()</code> so that it is pulled from the <a href="/api/set_up/di.html#3-1-2-5">PSR-11 container</a>.
+A stateless process manager that listens on an event to dispatch a new command, can be provided as a <code>callable</code>. It's recommended to use the array callable syntax like
+discussed for <a href="#3-2-4-6">aggregate functions</a>.</p>
+<p>Let's look at an example:</p>
+<p class="alert alert-info">Whenever an order was placed the system should generate an invoice.</p>
+<pre><code class="language-php">final class GenerateInvoiceTrigger
+{
+    public static function onOrderPlaced(Message $orderPlaced): array 
+    {
+        return [
+            Command::GENERATE_INVOICE,
+            [
+                Payload::ORDER_ID =&gt; $orderPlaced-&gt;get(Payload::ORDER_ID)    
+            ]    
+        ];
+    }
+}
+</code></pre>
+<p>A process manager can return a command using the "short message syntax" of Event Engine.
+The command is automatically dispatched by Event Engine. The only thing we need to do is
+to attach the process manager function to the correct event:</p>
+<pre><code class="language-php">$eventEngine-&gt;on(Event::ORDER_PLACED, [GenerateInvoiceTrigger::class, 'onOrderPlaced']);
+</code></pre>
+<p>@TODO Describe query, type and projection registration</p>
 </div>        </div>
     </div>
 </div>
@@ -1024,7 +1274,7 @@ a central overview for navigation through the code.</p>
                 <div class="prev col-xs-6">
                                             <a href="https://event-engine.io/api/set_up/production_optimization.html">Previous</a>                                    </div>
                 <div class="next col-xs-6">
-                                            <a href="https://event-engine.io/api/functional_flavour.html">Next</a>                                    </div>
+                                            <a href="https://event-engine.io/api/functional_core.html">Next</a>                                    </div>
             </div>
         </div>
     </div>
