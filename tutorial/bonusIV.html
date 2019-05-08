@@ -913,10 +913,10 @@ final class EventSourcedAggregatePort implements Port
      * @param string $aggregateType
      * @param callable $aggregateFactory
      * @param $customCommand
-     * @param null|mixed $context
+     * @param array $contextServices
      * @return mixed Created aggregate
      */
-    public function callAggregateFactory(string $aggregateType, callable $aggregateFactory, $customCommand, $context = null)
+    public function callAggregateFactory(string $aggregateType, callable $aggregateFactory, $customCommand, ...$contextServices)
     {
         // TODO: Implement callAggregateFactory() method.
     }
@@ -924,9 +924,9 @@ final class EventSourcedAggregatePort implements Port
     /**
      * @param mixed $aggregate
      * @param mixed $customCommand
-     * @param null|mixed $context
+     * @param array $contextServices
      */
-    public function callAggregateWithCommand($aggregate, $customCommand, $context = null): void
+    public function callAggregateWithCommand($aggregate, $customCommand, ...$contextServices): void
     {
         // TODO: Implement callAggregateWithCommand() method.
     }
@@ -1434,12 +1434,12 @@ final class EventSourcedAggregatePort implements Port
      * @param string $aggregateType
      * @param callable $aggregateFactory
      * @param $customCommand
-     * @param null|mixed $context
+     * @param array $contextServices
      * @return mixed Created aggregate
      */
-    public function callAggregateFactory(string $aggregateType, callable $aggregateFactory, $customCommand, $context = null)
+    public function callAggregateFactory(string $aggregateType, callable $aggregateFactory, $customCommand, ...$contextServices)
     {
-        return $aggregateFactory($customCommand, $context);
+        return $aggregateFactory($customCommand, ...$contextServices);
     }
 
     /* ... */
@@ -1478,22 +1478,22 @@ class Aggregate implements EventEngineDescription
 }
 
 </code></pre>
-<p class="alert alert-warning"><code>$context</code> is not an argument of <code>Building::add()</code> but PHP does not care. We can use that to our advantage.
-The port does not need to know if an aggregate factory or command handling function is interested in a context or not.
-It just passes it always to the function. If context is <code>null</code> and the function doesn't care, everything is fine.</p>
+<p class="alert alert-warning"><code>$contextServices</code> is not an argument of <code>Building::add()</code> but PHP does not care. We can use that to our advantage.
+The port does not need to know if an aggregate factory or command handling function is interested in a context or requires dependencies.
+It just passes it always to the function. If <code>$contextServices</code> is empty and the function doesn't care, everything is fine.</p>
 <h2 id="2-12-9">Command Handling</h2>
 <p><code>Oop\Port::callAggregateWithCommand()</code> is next on the list. Let's see ...</p>
 <pre><code class="language-php">/**
  * @param mixed $aggregate
  * @param mixed $customCommand
- * @param null|mixed $context
+ * @param array $contextServices
  */
-public function callAggregateWithCommand($aggregate, $customCommand, $context = null): void
+public function callAggregateWithCommand($aggregate, $customCommand, ...$contextServices): void
 {
     // TODO: Implement callAggregateWithCommand() method.
 }
 </code></pre>
-<p>We get the <code>$aggregate</code> instance, a <code>$customCommand</code> and optionally a <code>$context</code>. We could use a <code>switch (command) -&gt; call $aggregate-&gt;method</code> approach,
+<p>We get the <code>$aggregate</code> instance, a <code>$customCommand</code> and optionally a list of <code>$contextServices</code>. We could use a <code>switch (command) -&gt; call $aggregate-&gt;method</code> approach,
 but we are lazy. We don't want to touch the port each time we add a new command to the system. Conventions work great to get around the issue.</p>
 <p><strong>An aggregate root should have a method named like the command, whereby command name is derived from its class name without namespace. The first letter of the name is lowercase.</strong></p>
 <p>Looking at <code>Building</code> methods, it's exactly what we already have in place ;) We just need to implement the convention in the port.</p>
@@ -1513,13 +1513,13 @@ final class EventSourcedAggregatePort implements Port
     /**
      * @param mixed $aggregate
      * @param mixed $customCommand
-     * @param null|mixed $context
+     * @param array $contextServices
      */
-    public function callAggregateWithCommand($aggregate, $customCommand, $context = null): void
+    public function callAggregateWithCommand($aggregate, $customCommand, ...$contextServices): void
     {
         $commandNameParts = \explode('\\', \get_class($customCommand));
         $handlingMethod = \lcfirst(\array_pop($commandNameParts));
-        $aggregate-&gt;{$handlingMethod}($customCommand, $context);
+        $aggregate-&gt;{$handlingMethod}($customCommand, ...$contextServices);
     }
 
     /* ... */
