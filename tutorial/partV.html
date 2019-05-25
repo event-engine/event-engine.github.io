@@ -1051,7 +1051,7 @@ $container = require 'config/container.php';
 /** @var \EventEngine\DocumentStore\DocumentStore $documentStore */
 $documentStore = $container-&gt;get(EventEngine\DocumentStore\DocumentStore::class);
 
-if(!$documentStore-&gt;hasCollection('buildings')) {
+if(!$documentStore-&gt;hasCollection(\MyService\Domain\Resolver\BuildingResolver::COLLECTION)) {
     echo "Creating collection buildings.\n";
     $documentStore-&gt;addCollection(
         \MyService\Domain\Resolver\BuildingResolver::COLLECTION
