@@ -850,7 +850,7 @@ projects. This requires experimentation and with the PrototypingFlavour it's eas
 robust implementation. That's very important for long-lived applications. Fortunately, Event Engine offers two additional Flavours.
 One is called the <strong>FunctionalFlavour</strong> and the other one <strong>OopFlavour</strong>. Finally, you can implement your own <code>EventEngine\Runtime\Flavour</code>
 to turn Event Engine into your very own CQRS / ES framework.</p>
-<p>First let's look at the <strong>FunctionalFlavour</strong>. It's similar to what we did so fare, except that explicit message types are used instead of
+<p>First let's look at the <strong>FunctionalFlavour</strong>. It's similar to what we did so far, except that explicit message types are used instead of
 generic Event Engine messages.</p>
 <h2 id="2-11-2">Functional Port</h2>
 <p>The FunctionalFlavour requires an implementation of <code>EventEngine\Runtime\Functional\Port</code>. Here you have to define custom mapping and serialization
