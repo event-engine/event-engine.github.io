@@ -1559,7 +1559,7 @@ class Event implements EventEngineDescription
             throw new \InvalidArgumentException("Unknown event name: $eventName");
         }
 
-        //Commands use ImmutableRecordLogic and therefor have a fromArray method
+        //Events use ImmutableRecordLogic and therefor have a fromArray method
         return $class::fromArray($payload);
     }
 
@@ -1714,7 +1714,7 @@ class Query implements EventEngineDescription
             throw new \InvalidArgumentException("Unknown query name: $queryName");
         }
 
-        //Commands use ImmutableRecordLogic and therefor have a fromArray method
+        //Queries use ImmutableRecordLogic and therefor have a fromArray method
         return $class::fromArray($payload);
     }
 
@@ -1785,7 +1785,7 @@ The expected return type is <code>EventEngine\Messaging\MessageBag</code>. You c
 for custom messages. The MessageBag can be used to add metadata information. Event Engine
 adds information like aggregate id, aggregate type, aggregate version, causation id (command id) and causation name (command name)
 by default. If you want to add additional metadata, just pass it to the MessageBag constructor (optional argument).</p>
-<p class="alert alert-light">Decorating a custom event with a MessageBas has the advantage that a custom message can be carried through the Event Engine layer
+<p class="alert alert-light">Decorating a custom event with a MessageBag has the advantage that a custom message can be carried through the Event Engine layer
 without serialization. Event Engine assumes a normal message and adds aggregate specific metadata like described above.
 The MessageBag is then passed back to the configured flavour to call a corresponding apply function. The flavour can access
 the decorated event and pass it to the function. All without serialization in between. A similar approach is used when commands
