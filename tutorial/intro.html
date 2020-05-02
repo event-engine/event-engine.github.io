@@ -805,21 +805,23 @@
         </div>
                 <div class="col-md-9">
 <div id="section-main"><h1 id="2-1">Introduction</h1>
-<p>Event Engine is a rapid application development (RAD) framework so let us jump directly into
-the practical part of the tutorial. Event Engine basic concepts will be explained throughout the tutorial.
+<p>Event Engine is a rapid application development (RAD) framework. The basic concepts will be explained throughout the tutorial.
 Once finished, you should be able to start with your own project. The API docs will help you along the way.</p>
 <h2 id="2-1-1">Tutorial Domain</h2>
-<p>We will build a backend for a small application where you can register <code>buildings</code> and then <code>check in</code> and <code>check out</code>
+<p>We're going to build a backend for a small web application where you can register <code>buildings</code> and then <code>check in</code> and <code>check out</code>
 users in the buildings. The backend will expose a messagebox endpoint that excepts commands and queries.
 Each time a user is <code>checked in</code> or <code>checked out</code> we get a notification via a websocket connection.</p>
+<p><img src="https://event-engine.io/tutorial/img/inspectio_buildings_intro.png" alt="InspectIO Buildings Intro"></p>
+<p class="alert alert-info">The screenshot is taken from <a class="alert-link" href="https://github.com/event-engine/inspectio">InspectIO</a> - a domain modelling tool for (remote) teams that supports living documentation.
+Event Engine users can request free access in the chat.</p>
 <p class="alert alert-light"><em>Credits: The tutorial domain is the same as the one used by Marco Pivetta in his CQRS and Event Sourcing Workshops.</em></p>
 <h2 id="2-1-2">Application set up</h2>
 <p>Please make sure you have <a href="https://docs.docker.com/engine/installation/" title="Install Docker">Docker</a> and <a href="https://docs.docker.com/compose/install/" title="Install Docker Compose">Docker Compose</a> installed.</p>
-<p class="alert alert-warning"><em>Note: Docker is THE ONLY supported set up at the moment. If you don't want to install docker you need PHP 7.2+ and Postgres 9.4+.</em></p>
+<p class="alert alert-warning"><em>Note: Docker is THE ONLY supported set up at the moment. If you don't want to install docker you need PHP 7.4+ and Postgres 9.4+.</em></p>
 <h3 id="2-1-2-1">Clone Event Engine Skeleton</h3>
 <p>Change into your working directory and use <code>composer</code> to create a new project based on the <a href="https://github.com/event-engine/php-engine-skeleton">event engine skeleton</a>
 using <code>ee-buildings</code> as project name.</p>
-<pre><code class="language-bash">$ docker run --rm -it -v $(pwd):/app prooph/composer:7.2 create-project event-engine/php-engine-skeleton ee-buildings
+<pre><code class="language-bash">$ docker run --rm -it -v $(pwd):/app prooph/composer:7.4 create-project event-engine/php-engine-skeleton ee-buildings
 </code></pre>
 <p>Change into the newly created project dir <code>ee-buildings</code>, start the docker containers and run the set up script
 for the event store.</p>
@@ -836,18 +838,18 @@ $ docker-compose run php php scripts/create_event_stream.php
 port: 5432
 dbname: event_engine
 user: postgres
-pwd: 
+pwd: dev
 </code></pre>
 <p class="alert alert-info"><em>Note: Credentials are defined in <code>app.env</code> and can be changed there.</em></p>
 <p>You should see three tables: <code>event_streams</code>, <code>projections</code> and <code>_&lt;sha1&gt;</code>. The latter is a table created by <code>prooph/event-store</code>.
 It will contain all <code>domain events</code>.</p>
 <h4 id="2-1-2-2-2">Webserver</h4>
-<p>Head over to <code>http://localhost:8080</code> to check if the containers are up and running.
-You should see a simple "It works" message.</p>
-<h4 id="2-1-2-2-3">Swagger UI</h4>
-<p>By default Event Engine exposes commands (we will learn more about them in a minute), events and queries via a message box endpoint.
-We can use <a href="https://swagger.io/swagger-ui/">Swagger UI</a> to interact with the backend.</p>
-<p>The Event Engine skeleton ships with a ready to use Swagger UI. Open <a href="http://localhost:8080/swagger/index.html">http://localhost:8080/swagger/index.html</a>
+<p>Head over to <a href="https://localhost">https://localhost</a> to check if the containers are up and running.
+After accepting the self-signed certificate you should see a simple "It works" message.</p>
+<h4 id="2-1-2-2-3">Event Engine Cockpit</h4>
+<p>By default Event Engine exposes commands (we will learn more about them in a minute), events, and queries via a message box endpoint.
+We can use <a href="https://github.com/event-engine/cockpit">Event Engine Cockpit</a> to interact with the backend.</p>
+<p>The Event Engine skeleton ships with a ready to use Cockpit configuration. Open <a href="https://localhost:4444">https://localhost:4444</a>
 in your browser and try the built-in <code>HealthCheck</code> query.</p>
 <p>You should get a JSON response similar to that one:</p>
 <pre><code class="language-json">{

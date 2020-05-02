@@ -807,7 +807,10 @@ checked into, if any.</p>
 <p>Before we implement that feature you're asked to implement the <em>check out user</em> use case.
 Add a command <code>CheckOutUser</code> and an event <code>UserCheckedOut</code>. Let the <code>Building</code> aggregate and <code>Building\State</code> handle the command
 and make sure that <code>DoubleCheckOutDetected</code> can also be monitored using the monitoring UI.</p>
-<p>Does it work? Great!</p>
+<p><img src="https://event-engine.io/tutorial/img/double_check_out_detected.png" alt="InspectIO Double Check Out"></p>
+<p class="alert alert-info">The screenshot is taken from <a class="alert-link" href="https://github.com/event-engine/inspectio">InspectIO</a> - a domain modelling tool for (remote) teams that supports living documentation.
+Event Engine users can request free access in the chat.</p>
+<p><strong>Does it work? Great!</strong></p>
 <h2 id="2-9-2">Implement a Projector</h2>
 <p>What we need is a list of usernames and a reference to the building they are checked into.
 A custom projection can keep track of <code>UserCheckedIn</code> and <code>UserCheckedOut</code> events to keep the list up-to-date.</p>
@@ -950,9 +953,6 @@ class Projection implements EventEngineDescription
     public static function describe(EventEngine $eventEngine): void
     {
         $eventEngine-&gt;watch(Stream::ofWriteModel())
-            -&gt;withAggregateProjection(Aggregate::BUILDING);
-
-        $eventEngine-&gt;watch(Stream::ofWriteModel())
             -&gt;with(self::USER_BUILDING_LIST, UserBuildingList::class)
             -&gt;filterEvents([
                 Event::USER_CHECKED_IN,
@@ -986,7 +986,7 @@ of Event Engine. To activate it, uncomment the appropriate docker container in <
 <p>and start it with:</p>
 <pre><code class="language-bash">docker-compose up -d
 </code></pre>
-<p>If you look at the Postgres DB you should see a new table called <code>building_list_0_1_0</code> with one row:</p>
+<p>If you look at the Postgres DB you should see a new table called <code>user_building_list_0_1_0</code> with one row:</p>
 <table>
 <thead>
 <tr>
@@ -1002,7 +1002,7 @@ of Event Engine. To activate it, uncomment the appropriate docker container in <
 </tbody>
 </table>
 <p class="alert alert-warning">If the table is empty make sure that you've checked in John. If that's the case, your projection might have a problem. Check the troubleshooting section
-of the skeleton README.</p>
+of the skeleton <a href="https://github.com/event-engine/php-engine-skeleton#troubleshooting">README</a>.</p>
 <p class="alert alert-info">The <strong>write-model-projection</strong> is a single long-running php process. It polls the event store for new events and forwards them to Event Engine.
 Event Engine checks its projection descriptions and invokes all projectors interested in the forwarded events. If you add another projection
 and want to fill it with past data, you can run the script <code>docker-compose run --rm php php bin/reset.php</code>. Projections are versioned
@@ -1240,7 +1240,7 @@ class Query implements EventEngineDescription
 }
 
 </code></pre>
-<p><em>Swagger - UserBuilding query</em></p>
+<p><em>Cockpit - UserBuilding query</em></p>
 <pre><code class="language-json">{
   "name": "John"
 }

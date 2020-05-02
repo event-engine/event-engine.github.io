@@ -811,7 +811,7 @@ in greater detail later, but first we want to see a <strong>pure aggregate funct
 because normally a command is handled by a command handler (comparable to an application service that handles a domain action)
 and the command handler would load a business entity or "DDD" aggregate from a repository. We still use the aggregate concept but make
 use of a functional programming approach. It keeps the domain model lean and testable and allows some nice
-optimizations for a RAD infrastructure.</p>
+optimizations for RAD infrastructure.</p>
 <p>Let's add the first aggregate called <code>Building</code> in a new <code>Model</code> folder:</p>
 <pre><code class="language-php">&lt;?php
 
@@ -842,7 +842,7 @@ we use the <strong>PrototypingFlavour</strong>. Two bonus parts at the end of th
 all state changes in a series of domain events. These domain events are yielded by aggregate methods and stored in an event store
 managed by Event Engine. The series of events can then be used to calculate the current state of an aggregate.
 We will see that in action in a later part of the tutorial and get a better understanding of the technique
-when we add more use cases to the application.</p>
+when we add more use cases.</p>
 <p>For now let's add the first domain event in <code>src/Domain/Api/Event</code>:</p>
 <pre><code class="language-php">&lt;?php
 
@@ -907,7 +907,7 @@ final class Building
 <p class="alert alert-info">The special array syntax for yielding events is a short cut used by Event Engine. It creates the event based on given
 event name and payload and stores it in the event stream.</p>
 <h2 id="2-3-3">Aggregate Description</h2>
-<p>If we switch back to the Swagger UI and send the <code>AddBuilding</code> command again, Event Engine still
+<p>If we switch back to Cockpit and send the <code>AddBuilding</code> command again, Event Engine still
 complains about a missing command handler. We need to tell Event Engine about our new aggregate and that it is
 responsible for handling <code>AddBuilding</code> commands. We can do this in another Event Engine Description in <code>src/Domain/Api/Aggregate</code>.</p>
 <pre><code class="language-php">&lt;?php
@@ -954,7 +954,7 @@ which can be analyzed by modern IDEs like PHPStorm for auto completion and refac
 <li>
 <code>recordThat</code> tells Event Engine which event is yielded by the aggregate's command handling method.</li>
 </ul>
-<p>If we try again to send <code>AddBuilding</code> we get a new error:</p>
+<p>If we try again to send <code>AddBuilding</code> (or reload the schema in Cockpit) we get a new error:</p>
 <pre><code class="language-json">{
   "exception": { 
       "message": "No apply function specified for event: BuildingAdded",

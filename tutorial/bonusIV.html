@@ -1534,10 +1534,11 @@ declare(strict_types=1);
 
 namespace MyService\Domain\Api;
 
+use EventEngine\Runtime\Oop\FlavourHint;
 use MyService\Domain\Model\Building;
 use EventEngine\EventEngine;
 use EventEngine\EventEngineDescription;
-use EventEngine\Runtime\Oop\FlavourHint;
+use MyService\Domain\Resolver\BuildingResolver;
 
 class Aggregate implements EventEngineDescription
 {
@@ -1553,7 +1554,9 @@ class Aggregate implements EventEngineDescription
             -&gt;identifiedBy(Payload::BUILDING_ID)
             -&gt;handle([Building::class, 'add'])
             -&gt;recordThat(Event::BUILDING_ADDED)
-            -&gt;apply([FlavourHint::class, 'useAggregate']);
+            -&gt;apply([FlavourHint::class, 'useAggregate'])
+            -&gt;storeStateIn(BuildingResolver::COLLECTION);
+
 
         $eventEngine-&gt;process(Command::CHECK_IN_USER)
             -&gt;withExisting(self::BUILDING)
@@ -1725,65 +1728,16 @@ trait SystemServices
 </code></pre>
 <p>As stated at the beginning, the <strong>OopFlavour</strong> uses the <strong>FunctionalFlavour</strong> mainly to make use of custom message handling.</p>
 <h2 id="2-12-12">Fixing tests</h2>
-<p>At least the <code>BuildingTest</code> should fail after latest changes. Let's see if we need to work some extra hours or can go out to have a beer with a friend:</p>
+<p>At least the <code>BuildingTest</code> should fail after latest changes. Let's see if we need to work some extra hours or can go out for a beer with a friend:</p>
 <pre><code class="language-bash">docker-compose run php php vendor/bin/phpunit
 </code></pre>
-<p>As expected, <code>BuildingTest</code> is broken, but should be easy to fix. First let's add a new helper method in <code>tests/TestCaseAbstract.php</code>:</p>
-<pre><code class="language-php">&lt;?php
-declare(strict_types=1);
-
-namespace MyServiceTest;
-
-use EventEngine\DocumentStore\DocumentStore;
-use EventEngine\EventEngine;
-use EventEngine\EventStore\EventStore;
-use EventEngine\Logger\DevNull;
-use EventEngine\Logger\SimpleMessageEngine;
-use EventEngine\Messaging\Message;
-use EventEngine\Messaging\MessageBag;
-use EventEngine\Messaging\MessageProducer;
-use EventEngine\Persistence\InMemoryConnection;
-use EventEngine\Prooph\V7\EventStore\InMemoryMultiModelStore;
-use EventEngine\Runtime\Oop\FlavourHint;
-use EventEngine\Util\MessageTuple;
-use MyService\Domain\Api\Event;
-use MyService\Domain\Model\Base\AggregateRoot;
-use MyService\Domain\Model\Base\DomainEvent;
-use MyService\ServiceFactory;
-use MyServiceTest\Mock\EventQueueMock;
-use MyServiceTest\Mock\MockContainer;
-use PHPUnit\Framework\TestCase;
-
-class TestCaseAbstract extends TestCase
-{
-    /* ... */
-
-    protected function applyEvents(AggregateRoot $aggregateRoot)
-    {
-        array_walk($aggregateRoot-&gt;popRecordedEvents(), function (DomainEvent $event) use ($aggregateRoot) {
-            $this-&gt;eventEngine-&gt;flavour()-&gt;callApplySubsequentEvent(
-                [FlavourHint::class, 'useAggregate'],
-                $aggregateRoot,
-                new MessageBag(
-                    Event::nameOf($event),
-                    MessageBag::TYPE_EVENT,
-                    $event
-                )
-            );
-        });
-    }
-}
-
-</code></pre>
-<p>With a little test helper <code>applyEvents</code> we can use the Flavour to apply recorded events.</p>
-<p>When testing event sourced objects we cannot simply prepare state and call a function.
-We have to invoke all command handling functions needed to get the aggregate into desired state.
-That's the change we have to make in <code>BuildingTest</code>:</p>
+<p>As expected, <code>BuildingTest</code> is broken, but should be easy to fix:</p>
 <pre><code class="language-php">&lt;?php
 declare(strict_types=1);
 
 namespace MyServiceTest\Domain\Model;
 
+use MyService\Domain\Api\Command;
 use MyService\Domain\Api\Event;
 use MyService\Domain\Api\Payload;
 use MyServiceTest\UnitTestCase;
@@ -1796,7 +1750,7 @@ final class BuildingTest extends UnitTestCase
     private $buildingName;
     private $username;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this-&gt;buildingId = Uuid::uuid4()-&gt;toString();
         $this-&gt;buildingName = 'Acme Headquarters';
@@ -1811,60 +1765,18 @@ final class BuildingTest extends UnitTestCase
     public function it_checks_in_a_user()
     {
         //Prepare expected aggregate state
-        $addBuilding = Building\Command\AddBuilding::fromArray([
-            Payload::BUILDING_ID =&gt; $this-&gt;buildingId,
-            Payload::NAME =&gt; $this-&gt;buildingName
+        $state = Building\State::fromArray([
+            Building\State::BUILDING_ID =&gt; $this-&gt;buildingId,
+            Building\State::NAME =&gt; $this-&gt;buildingName
         ]);
+
         /** @var Building $building */
-        $building = Building::add($addBuilding);
+        $building = Building::reconstituteFromStateArray($state-&gt;toArray());
 
-        //New test helper to apply recorded events
-        $this-&gt;applyEvents($building);
-
+        //Use test helper UnitTestCase::makeCommand() to construct command
         $command = Building\Command\CheckInUser::fromArray([
-            Payload::BUILDING_ID =&gt; $this-&gt;buildingId,
-            Payload::NAME =&gt; $this-&gt;username,
-        ]);
-
-        $building-&gt;checkInUser($command);
-
-        $events = $building-&gt;popRecordedEvents();
-
-        $this-&gt;assertRecordedEvent(Event::USER_CHECKED_IN, [
-            Payload::BUILDING_ID =&gt; $this-&gt;buildingId,
-            Payload::NAME =&gt; $this-&gt;username
-        ], $events);
-    }
-
-    /**
-     * @test
-     */
-    public function it_detects_double_check_in()
-    {
-        //Prepare expected aggregate state
-        $addBuilding = Building\Command\AddBuilding::fromArray([
-            Payload::BUILDING_ID =&gt; $this-&gt;buildingId,
-            Payload::NAME =&gt; $this-&gt;buildingName
-        ]);
-        /** @var Building $building */
-        $building = Building::add($addBuilding);
-
-        $this-&gt;applyEvents($building);
-
-        $checkInUser = Building\Command\CheckInUser::fromArray([
-            Payload::BUILDING_ID =&gt; $this-&gt;buildingId,
-            Payload::NAME =&gt; $this-&gt;username,
-        ]);
-
-        $building-&gt;checkInUser($checkInUser);
-
-        $this-&gt;applyEvents($building);
-
-        //Test double check in
-
-        $command = Building\Command\CheckInUser::fromArray([
-            Payload::BUILDING_ID =&gt; $this-&gt;buildingId,
-            Payload::NAME =&gt; $this-&gt;username,
+            Building\State::BUILDING_ID =&gt; $this-&gt;buildingId,
+            Building\State::NAME =&gt; $this-&gt;username,
         ]);
 
         $building-&gt;checkInUser($command);
@@ -1872,17 +1784,16 @@ final class BuildingTest extends UnitTestCase
         $events = $building-&gt;popRecordedEvents();
 
         //Another test helper to assert that list of recorded events contains given event
-        $this-&gt;assertRecordedEvent(Event::DOUBLE_CHECK_IN_DETECTED, [
+        $this-&gt;assertRecordedEvent(Event::USER_CHECKED_IN, [
             Payload::BUILDING_ID =&gt; $this-&gt;buildingId,
             Payload::NAME =&gt; $this-&gt;username
         ], $events);
-
-        //And the other way round, list should not contain event with given name
-        $this-&gt;assertNotRecordedEvent(Event::USER_CHECKED_IN, $events);
     }
 }
 
 </code></pre>
+<p>We can use methods from <code>AggregateRoot</code> to set up our <code>Building</code> with state, invoke the command handling method and use
+<code>popRecordedEvents()</code> to access newly recorded events. That's it!</p>
 <h2 id="2-12-13">Wrap Up</h2>
 <p class="alert alert-success">At this point the tutorial ends. Thank you for taking the tour through the world of CQRS and Event Sourcing with Event Engine.
 We started our tour with a rapid development approach. Event Engine really shines here. The skeleton application is preconfigured including

@@ -968,7 +968,7 @@ public function deserialize(Message $message)
 <p class="alert alert-info"><strong>Which serialization technique do we want to use?</strong> Some people prefer handcrafted serialization, while others prefer conventions or serializers.
 The good news is, every technique can be used! It just needs to be implemented in the Port.</p>
 <p>To keep the tutorial simple, we're going to use the tools shipped with Event Engine.
-That said, our messages become <code>ImmutableRecord</code>s and use the build-in serialization technique provided by <code>ImmutableRecordLogic</code>.</p>
+That said, our messages become <code>ImmutableRecord</code>s and use the built-in serialization technique provided by <code>ImmutableRecordLogic</code>.</p>
 <p class="alert alert-warning">The fact that messages are still coupled with the framework is not important here. It's our decision as developers to do it, but nothing required by Event Engine.
 We could also write our own serialization mechanism or use a third-party tool like <a class="alert-link" href="https://github.com/prolic/fpp">FPP</a>.</p>
 <p>Let's create some types and messages first:</p>
@@ -1233,7 +1233,7 @@ final class CheckOutUser implements ImmutableRecord
 
 </code></pre>
 <p>Ok, much more classes now. Each property has its own value object like <code>BuildingId</code>, <code>BuildingName</code> and <code>Username</code>. Again, that's not a requirement but it adds type safety to
-the implementation and serves as documentation. Don't worry about the amount of code. Most of it can be generated using PHPStorm templates. Event Engine docs contain useful tips (@TODO add docs link).
+the implementation and serves as documentation. Don't worry about the amount of code. Most of it can be generated using PHPStorm templates. Event Engine docs contain useful <a href="https://event-engine.io/api/immutable_state.html#3-4">tips</a>.
 Another possibility is the already mentioned library <a href="https://github.com/prolic/fpp">FPP</a>.</p>
 <p>With the value objects in place we've added a class for each command and implemented them as immutable records. Now we need a factory to instantiate a command with information
 taken from Event Engine messages. <code>MyService\Domain\Api\Command</code> already contains command specific information. Let's add the factory there.</p>
@@ -1680,7 +1680,7 @@ use MyService\Domain\Resolver\Query\GetBuilding;
 use MyService\Domain\Resolver\Query\GetBuildings;
 use MyService\Domain\Resolver\Query\GetUserBuildingList;
 use MyService\Domain\Resolver\UserBuildingResolver;
-use MyService\System\Api\SystemType;
+use MyService\System\Api\SystemQuery;
 
 class Query implements EventEngineDescription
 {
@@ -1700,9 +1700,9 @@ class Query implements EventEngineDescription
 
     public static function createFromNameAndPayload(string $queryName, array $payload)
     {
-        if($queryName === self::HEALTH_CHECK) {
+        if($queryName === SystemQuery::HEALTH_CHECK) {
             return new MessageBag(
-                self::HEALTH_CHECK,
+                SystemQuery::HEALTH_CHECK,
                 MessageBag::TYPE_QUERY,
                 []
             );
@@ -2141,7 +2141,7 @@ final class BuildingResolver implements Resolver
             new LikeFilter(self::STATE_DOT . Payload::NAME, "%$nameFilter%")
             : new AnyFilter();
 
-        $cursor = $this-&gt;documentStore-&gt;filterDocs(self::COLLECTION, $filter);
+        $cursor = $this-&gt;documentStore-&gt;findDocs(self::COLLECTION, $filter);
 
         $buildings = [];
 
@@ -2264,14 +2264,7 @@ use Psr\Log\LoggerInterface;
 
 trait SystemServices
 {
-    public function systemDescriptions(): array
-    {
-        return [
-            SystemType::class,
-            SystemQuery::class,
-            EventEngineConfig::class,
-        ];
-    }
+    /* ... */
 
     public function flavour(): Flavour
     {
@@ -2280,73 +2273,7 @@ trait SystemServices
         });
     }
 
-    public function healthCheckResolver(): HealthCheckResolver
-    {
-        return $this-&gt;makeSingleton(HealthCheckResolver::class, function () {
-            return new HealthCheckResolver();
-        });
-    }
-
-    public function logger(): LoggerInterface
-    {
-        return $this-&gt;makeSingleton(LoggerInterface::class, function () {
-            $streamHandler = new StreamHandler('php://stderr');
-
-            return new Logger('EventEngine', [$streamHandler]);
-        });
-    }
-
-    public function logEngine(): LogEngine
-    {
-        return new SimpleMessageEngine($this-&gt;logger());
-    }
-
-    public function uiExchange(): UiExchange
-    {
-        return $this-&gt;makeSingleton(UiExchange::class, function () {
-            $this-&gt;assertMandatoryConfigExists('rabbit.connection');
-
-            $connection = new \Humus\Amqp\Driver\AmqpExtension\Connection(
-                $this-&gt;config()-&gt;arrayValue('rabbit.connection')
-            );
-
-            $connection-&gt;connect();
-
-            $channel = $connection-&gt;newChannel();
-
-            $exchange = $channel-&gt;newExchange();
-
-            $exchange-&gt;setName($this-&gt;config()-&gt;stringValue('rabbit.ui_exchange', 'ui-exchange'));
-
-            $exchange-&gt;setType('fanout');
-
-            $humusProducer = new \Humus\Amqp\JsonProducer($exchange);
-
-            $messageProducer = new \Prooph\ServiceBus\Message\HumusAmqp\AmqpMessageProducer(
-                $humusProducer,
-                new NoOpMessageConverter()
-            );
-
-            return new class($messageProducer) implements UiExchange {
-                private $producer;
-                public function __construct(AmqpMessageProducer $messageProducer)
-                {
-                    $this-&gt;producer = $messageProducer;
-                }
-
-                public function __invoke(Message $event): void
-                {
-                    $this-&gt;producer-&gt;__invoke(GenericProophEvent::fromArray([
-                        'uuid' =&gt; $event-&gt;uuid()-&gt;toString(),
-                        'message_name' =&gt; $event-&gt;messageName(),
-                        'payload' =&gt; $event-&gt;payload(),
-                        'metadata' =&gt; $event-&gt;metadata(),
-                        'created_at' =&gt; $event-&gt;createdAt()
-                    ]));
-                }
-            };
-        });
-    }
+    /* ... */
 }
 
 </code></pre>
@@ -2598,7 +2525,7 @@ final class UserBuildingList implements CustomEventProjector
 }
 
 </code></pre>
-<p>The <code>UiExchange</code> event listener included in the skeleton application needs to b aligned, too.
+<p>The <code>UiExchange</code> event listener included in the skeleton application needs to be aligned, too.
 First, the corresponding interface should handle any type of event:</p>
 <p><code>src/System/UiExchange.php</code></p>
 <pre><code class="language-php">&lt;?php
@@ -2705,11 +2632,11 @@ trait SystemServices
 }
 
 </code></pre>
-<p>That's it! You can use the <a href="http://localhost:8080/swagger/index.html#/">Swagger UI</a> to test changes.</p>
+<p>That's it! You can use <a href="https://localhost:4444">Cockpit</a> to test the changes.</p>
 <p>Or wait! We did not run the tests!</p>
 <pre><code class="language-bash">docker-compose run php php vendor/bin/phpunit
 </code></pre>
-<p>Doesn't look good, right? Let's fix them!</p>
+<p>Doesn't look good, right? Let's fix it!</p>
 <p><code>TestCaseAbstract::assertRecordedEvent()</code> method need to be aligned:</p>
 <pre><code class="language-php">&lt;?php
 declare(strict_types=1);
@@ -2790,7 +2717,7 @@ final class NotifySecurityTest extends IntegrationTestCase
 
     private $uiExchange;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -2897,7 +2824,7 @@ final class BuildingTest extends UnitTestCase
     private $buildingName;
     private $username;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this-&gt;buildingId = Uuid::uuid4()-&gt;toString();
         $this-&gt;buildingName = 'Acme Headquarters';
@@ -2966,7 +2893,7 @@ final class UserBuildingListTest extends UnitTestCase
      */
     private $projector;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -2999,7 +2926,7 @@ final class UserBuildingListTest extends UnitTestCase
             $johnCheckedIn
         );
 
-        $users = iterator_to_array($this-&gt;documentStore-&gt;filterDocs(
+        $users = iterator_to_array($this-&gt;documentStore-&gt;findDocs(
             $collection,
             new AnyFilter()
         ));
@@ -3019,7 +2946,7 @@ final class UserBuildingListTest extends UnitTestCase
             $janeCheckedIn
         );
 
-        $users = iterator_to_array($this-&gt;documentStore-&gt;filterDocs(
+        $users = iterator_to_array($this-&gt;documentStore-&gt;findDocs(
             $collection,
             new AnyFilter()
         ));
@@ -3040,7 +2967,7 @@ final class UserBuildingListTest extends UnitTestCase
             $johnCheckedOut
         );
 
-        $users = iterator_to_array($this-&gt;documentStore-&gt;filterDocs(
+        $users = iterator_to_array($this-&gt;documentStore-&gt;findDocs(
             $collection,
             new AnyFilter()
         ));
@@ -3053,7 +2980,7 @@ final class UserBuildingListTest extends UnitTestCase
 
 </code></pre>
 <p class="alert alert-success"><strong>Tests are green again. Refactoring finished successfully. Was it worth the effort?</strong>
-Switching the Flavour is quite some workt to do, isn't it? Depending on the amount of already written code and tests this task can take some days and you need to make sure
+Switching the Flavour is quite some work to do, isn't it? Depending on the amount of already written code and tests this task can take some days and you need to make sure
 that you don't break existing functionality. On the other hand you get a fully decoupled domain model.
 Of course, it's also possible to use another Flavour right from the beginning. But keep in mind, that the PrototypingFlavour saves a lot of time in the early days
 of a project. You don't know if the first app version really meets business and user needs. You can only try and experiment. The faster you have a working

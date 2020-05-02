@@ -829,7 +829,7 @@ final class BuildingTest extends UnitTestCase
     private $buildingName;
     private $username;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this-&gt;buildingId = Uuid::uuid4()-&gt;toString();
         $this-&gt;buildingName = 'Acme Headquarters';
@@ -900,7 +900,7 @@ final class UserBuildingListTest extends UnitTestCase
      */
     private $projector;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
@@ -933,7 +933,7 @@ final class UserBuildingListTest extends UnitTestCase
             $johnCheckedIn
         );
 
-        $users = iterator_to_array($this-&gt;documentStore-&gt;filterDocs(
+        $users = iterator_to_array($this-&gt;documentStore-&gt;findDocs(
             $collection,
             new AnyFilter()
         ));
@@ -953,7 +953,7 @@ final class UserBuildingListTest extends UnitTestCase
             $janeCheckedIn
         );
 
-        $users = iterator_to_array($this-&gt;documentStore-&gt;filterDocs(
+        $users = iterator_to_array($this-&gt;documentStore-&gt;findDocs(
             $collection,
             new AnyFilter()
         ));
@@ -974,7 +974,7 @@ final class UserBuildingListTest extends UnitTestCase
             $johnCheckedOut
         );
 
-        $users = iterator_to_array($this-&gt;documentStore-&gt;filterDocs(
+        $users = iterator_to_array($this-&gt;documentStore-&gt;findDocs(
             $collection,
             new AnyFilter()
         ));
@@ -1014,7 +1014,7 @@ final class NotifySecurityTest extends IntegrationTestCase
 
     private $uiExchange;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 

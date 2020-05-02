@@ -799,7 +799,7 @@
 <div id="section-main"><h1 id="2-8">Part VII - The Unhappy Path</h1>
 <p>Developers tend to work out the happy path of a feature only and throw exceptions in every unknown situation.
 This behaviour is often caused by bad project management. Developers get domain knowledge from Jira tickets written by a product owner
-(Jira is used here as a synonym for any ticket system used in an agile process)
+(Jira is used here as a synonym for any ticket system)
 instead of talking to domain experts face-to-face. Most tickets don't include unhappy paths until they happen and find
 their way back to the developer as a bug ticket.</p>
 <p>Is this really the best way to deal with unexpected scenarios? Wouldn't it be better to prepare for
@@ -813,6 +813,9 @@ the decision it is always interesting to have an event in the event stream about
 much simpler than scanning error logs.</p>
 <p>We've talked to the domain experts and they want us to notify security in case of a <code>DoubleCheckIn</code>. With Event Engine
 this is as simple as throwing an exception ;)</p>
+<p><img src="https://event-engine.io/tutorial/img/notify_security.png" alt="InspectIO Notify Security"></p>
+<p class="alert alert-info">The screenshot is taken from <a class="alert-link" href="https://github.com/event-engine/inspectio">InspectIO</a> - a domain modelling tool for (remote) teams that supports living documentation.
+Event Engine users can request free access in the chat.</p>
 <p>We need an event to record a <code>DoubleCheckIn</code>:</p>
 <pre><code class="language-php">&lt;?php
 
@@ -848,7 +851,7 @@ class Event implements EventEngineDescription
 }
 
 </code></pre>
-<p>Now that we have the event we can replace the exception and yield a <code>DoubleCheckInDetected</code> event instead:</p>
+<p>Now that we have the event we can replace the exception and yield a <code>DoubleCheckInDetected</code> event:</p>
 <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -861,15 +864,7 @@ use EventEngine\Messaging\Message;
 
 final class Building
 {
-    public static function add(Message $addBuilding): \Generator
-    {
-        yield [Event::BUILDING_ADDED, $addBuilding-&gt;payload()];
-    }
-
-    public static function whenBuildingAdded(Message $buildingAdded): Building\State
-    {
-        return Building\State::fromArray($buildingAdded-&gt;payload());
-    }
+    /* ... */
 
     public static function checkInUser(Building\State $state, Message $checkInUser): \Generator
     {
@@ -881,10 +876,7 @@ final class Building
         yield [Event::USER_CHECKED_IN, $checkInUser-&gt;payload()];
     }
 
-    public static function whenUserCheckedIn(Building\State $state, Message $userCheckedIn): Building\State
-    {
-        return $state-&gt;withCheckedInUser($userCheckedIn-&gt;get(Payload::NAME));
-    }
+    /* ... */
 
     public static function whenDoubleCheckInDetected(Building\State $state, Message $event): Building\State
     {
@@ -894,7 +886,8 @@ final class Building
 }
 
 </code></pre>
-<p>We need to tell Event Engine that <code>Building::checkInUser()</code> yields <code>DoubleCheckInDetected</code> in some situations:</p>
+<p>Event Engine requires an event apply function for each event type, even if state does not change and it needs to know
+that <code>Building::checkInUser()</code> yields <code>DoubleCheckInDetected</code> in some situations:</p>
 <pre><code class="language-php">&lt;?php
 
 declare(strict_types=1);
@@ -935,57 +928,20 @@ class Aggregate implements EventEngineDescription
 }
 </code></pre>
 <p>Instead of an error we get a 202 command accepted response.</p>
-<p>But when we look at the event stream (table <code>_4228e4a00331b5d5e751db0481828e22a2c3c8ef</code>) we see a <code>DoubleCheckInDetected</code> event.</p>
-<table>
-<thead>
-<tr>
-<th>no</th>
-<th>event_id</th>
-<th>event_name</th>
-<th>payload</th>
-<th>metadata</th>
-<th>created_at</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>1</td>
-<td>bce42506-...</td>
-<td>BuildingAdded</td>
-<td>{"buildingId":"9ee8d8a8-...","name":"Acme Headquarters"}</td>
-<td>{"_aggregate_id": "9ee8d8a8-...", "_causation_id": "e482f5b8-...", "_aggregate_type": "Building", "_causation_name": "AddBuilding", "_aggregate_version": 1}</td>
-<td>2018-02-14 22:09:32.039848</td>
-</tr>
-<tr>
-<td>2</td>
-<td>0ee8d2fb-...</td>
-<td>UserCheckedIn</td>
-<td>{"buildingId":"9ee8d8a8-...","name":"John"}</td>
-<td>{"_aggregate_id": "9ee8d8a8-...", "_causation_id": "1ce0e46d-...", "_aggregate_type": "Building", "_causation_name": "CheckInUser", "_aggregate_version": 2}</td>
-<td>2018-02-16 21:37:55.131122</td>
-</tr>
-<tr>
-<td>3</td>
-<td>4f6a8429-...</td>
-<td>DoubleCheckInDetected</td>
-<td>{"buildingId":"9ee8d8a8-...","name":"John"}</td>
-<td>{"_aggregate_id": "9ee8d8a8-...", "_causation_id": "c347dd85-...", "_aggregate_type": "Building", "_causation_name": "CheckInUser", "_aggregate_version": 3}</td>
-<td>2018-02-16 23:03:59.739666</td>
-</tr>
-</tbody>
-</table>
+<p>But when we look at the <a href="https://localhost:4444/#/aggregates/building/9ee8d8a8-3bd3-4425-acee-f6f08b8633bb">aggregate details page</a> in Cockpit, we see a <code>DoubleCheckInDetected</code> event.</p>
+<p><img src="https://event-engine.io/tutorial/img/double_check_in_detected.png" alt="Cockpit double check in detected"></p>
 <h2 id="2-8-1">Process Manager</h2>
 <p>To complete the user story we have to notify security. The security team uses a dedicated monitoring application that
 can receive arbitrary notification messages. To communicate with that external system we can use a so-called <strong>process manager</strong> or
 <strong>policy</strong>. Maybe you're more familiar with the term event listener but be careful to not mix it with event listeners known
-from web frameworks like Symfony or Zend. Listeners in Event Engine <strong>react</strong> to domain events and trigger follow up
+from web frameworks like Symfony or Laravel. Listeners in Event Engine <strong>react</strong> to domain events and trigger follow up
 commands for actions, like sending emails or interacting with external systems.</p>
 <p>We can simulate the security monitoring system with a small JS app shipped with the php-engine-skeleton.
-Open <code>http://localhost:8080/ws.html</code> in your browser.</p>
+Open <a href="http://localhost:8080/ws.html">http://localhost:8080/ws.html</a> in your browser.</p>
 <p><em>Note: If the app shows a connection error then try to log into the rabbit mgmt console first: <code>https://localhost:8081</code>. Accept the self-signed certificate
 and login with usr: <code>prooph</code> pwd: <code>prooph</code>. If you're logged in switch back to <code>http://localhost:8080/ws.html</code> and reload the page.</em></p>
 <p>If the app says <code>Status: Connected to websocket: ui-queue</code> it is ready to receive messages from Event Engine.</p>
-<p>In <code>src/System/SystemServices</code> you can find a factory method for a <code>MyService\System\UiExchange</code>.
+<p>In <code>src/System/SystemServices</code> you can find a factory method for <code>MyService\System\UiExchange</code>.
 It's a default domain event listener shipped with the skeleton that can be used to push events on a <em>RabbitMQ ui-exchange</em>.
 The exchange is preconfigured (you can see that in the rabbit mgmt UI) and the JS app connects to a corresponding <em>ui-queue</em>.</p>
 <p>In <code>src/Domain/Api/Listener</code> we can put the pieces together:</p>
@@ -1027,10 +983,10 @@ developer experience with Event Engine.</p>
 <p class="alert alert-success">The prooph software team offers commercial project support and workshops for Event Engine and the prooph components.
 Our workshops include Event Storming sessions and guidance on how to turn the results into working prototypes using Event Engine.
 We can also show and discuss framework integrations. Event Engine can easily be integrated with <em>Symfony</em>, <em>Laravel</em> and
-other PHP web frameworks. The skeleton is based on <em>Zend Strategility</em> so you can handle http related tasks, like authentication,
+other PHP web frameworks. The skeleton is based on <em>Laminas Strategility</em> so you can handle http related tasks, like authentication,
 using <em>PSR-15</em> middleware. But again, other web frameworks play nicely with Event Engine!</p>
 <p><a href="http://prooph.de"><img src="https://github.com/codeliner/php-ddd-cargo-sample/raw/master/docs/assets/prooph-software-logo.png" alt="prooph software"></a></p>
-<p>If you are interested please <a href="http://getprooph.org/#get-in-touch">get in touch</a>!</p>
+<p>If you are interested please <a href="http://prooph.de">get in touch</a>!</p>
 </div>        </div>
     </div>
 </div>

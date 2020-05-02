@@ -793,8 +793,8 @@
                     Descriptions                </a>
             </li>
                                 <li>
-                <a href="#2-2-3" title="Swagger&#x20;Integration">
-                    Swagger Integration                </a>
+                <a href="#2-2-3" title="Cockpit&#x20;Integration">
+                    Cockpit Integration                </a>
             </li>
             </ul>
 </nav>
@@ -880,10 +880,11 @@ and Event Engine takes care of the rest.</p>
 <h2 id="2-2-2">Descriptions</h2>
 <p class="alert alert-info">Event Engine Descriptions are very important. They are called at "<strong>compile time</strong>" and used to configure Event Engine.
 Descriptions can be cached to speed up bootstrapping. Find more information in the API docs <strong>@TODO: link docs</strong>.</p>
-<h2 id="2-2-3">Swagger Integration</h2>
-<p>Switch to the Swagger UI and reload the schema (press explore button).
-Swagger UI should show a new <strong>command</strong> called <code>AddBuilding</code> in the commands section.</p>
-<p>Click on the "Try it out" button and <strong>execute</strong> the <code>AddBuilding</code> command with this request body:</p>
+<h2 id="2-2-3">Cockpit Integration</h2>
+<p>Switch to the Cockpit UI and reload the schema (press refresh button in top menu).
+Cockpit should show a new <strong>command</strong> called <code>AddBuilding</code> in the commands section.</p>
+<p class="alert alert-light">Click on "commands" in the left sidebar and then on "Not Categorized" to see the command.
+<strong>Send</strong> the <code>AddBuilding</code> command with this payload:</p>
 <pre><code class="language-json">{
   "buildingId": "9ee8d8a8-3bd3-4425-acee-f6f08b8633bb",
   "name": "Acme Headquarters"
@@ -899,11 +900,10 @@ Swagger UI should show a new <strong>command</strong> called <code>AddBuilding</
 </code></pre>
 <p>Our command cannot be handled because a command handler is missing. In Event Engine
 commands can be routed directly to <code>Aggregates</code>.
-In <strong>part II</strong> of the the tutorial you'll learn more about pure aggregates.</p>
+In <strong>part II</strong> you'll learn more about pure aggregates.</p>
 <p class="alert alert-success">Sum up: Event Engine Descriptions allow you to easily describe the API of your application using messages. The messages get
-a unique name and their payload is described with JSON Schema which allow us to add validation rules. The messages and their
-schema are translated to an OpenAPI v3 Schema and we can use Swagger UI to interact with the backend
-service.</p>
+a unique name and payload is described with JSON Schema which allow us to add validation rules. The messages and their
+schema can be used by Event Engine Cockpit to interact with the backend service.</p>
 </div>        </div>
     </div>
 </div>
